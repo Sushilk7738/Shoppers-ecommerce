@@ -61,10 +61,10 @@ def addOrderItems(request):
                 image = product.image.url,   
             )
 
-        #4 update stock
+            #4 update stock
         
-        product.countInStock -= int(item.qty)
-        product.save()
+            product.countInStock -= int(item.qty)
+            product.save()
     
     serializer = OrderSerializer(order, many = False)
     return Response(serializer.data)

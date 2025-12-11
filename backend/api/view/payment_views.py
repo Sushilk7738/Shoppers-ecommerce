@@ -79,7 +79,7 @@ def verify_payment(request):
         print("ALL PRODUCTS IN DB:", list(Product.objects.values("_id", "name")))
 
         for item in cart_items:
-            raw_id = item.get("id")
+            raw_id = item.get("_id") or item.get("id")
             print("ITEM ID RAW:", raw_id, type(raw_id))
 
             product = None
