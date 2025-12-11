@@ -19,38 +19,61 @@ const cartSlice = createSlice({
     },
 
     reducers: {
-        // ADD ITEM
+        // ✅ ADD ITEM (with unique key)
         addToCart: (state, action) => {
-            state.cartItems.push(action.payload);
+            if (!action.payload || !action.payload._id) {
+                console.error("INVALID PRODUCT PAYLOAD:", action.payload);
+                return;
+            }
+
+            const item = {
+                ...action.payload,
+                _id: action.payload._id,                 // ✅ MUST EXIST
+                _cartKey: `${action.payload._id}_${Date.now()}`,
+                qty: action.payload.qty || 1,
+            };
+
+            state.cartItems.push(item);
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 
-        // REMOVE BY ID
+
+        // ✅ REMOVE BY _cartKey
         removeFromCart: (state, action) => {
             state.cartItems = state.cartItems.filter(
-                (item) => item.id !== action.payload
+                (item) => item._cartKey !== action.payload
             );
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 
-        // CLEAR ALL ITEMS (used during LOGOUT)
-        clearCart: (state) => {
-            state.cartItems = [];
-            localStorage.removeItem("cartItems");
-        },
-
+        // ✅ UPDATE QUANTITY
         updateQuantity: (state, action) => {
-            const { id, qty } = action.payload;
+            const { _cartKey, qty } = action.payload;
 
-            const item = state.cartItems.find((i) => i.id === id);
+            const item = state.cartItems.find(
+                (i) => i._cartKey === _cartKey
+            );
+
             if (item) {
                 item.qty = qty < 1 ? 1 : qty;
             }
 
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
+
+        // ✅ CLEAR CART
+        clearCart: (state) => {
+            state.cartItems = [];
+            localStorage.removeItem("cartItems");
+        },
     },
 });
 
-export const { addToCart, removeFromCart, clearCart, updateQuantity,} = cartSlice.actions;
+export const {
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;

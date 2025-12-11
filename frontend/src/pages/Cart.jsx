@@ -7,9 +7,8 @@ const Cart = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const cart = useSelector((state) => state.cart.cartItems);
+    const cart = useSelector((state) => state.cart.cartItems) || [];
 
-    // TOTAL PRICE
     const cartTotal = cart.reduce(
         (total, item) => total + item.price * item.qty,
         0
@@ -32,88 +31,97 @@ const Cart = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    {/* LEFT PRODUCTS */}
                     <div className="md:col-span-2 space-y-4">
-                        {cart.map((item) => (
-                            <div
-                                key={item.id}
-                                className="flex items-center gap-4 p-4 shadow-md rounded-xl bg-white"
-                            >
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="w-20 h-20 rounded-md object-cover"
-                                />
+                        {cart.map((item, index) => {
 
-                                <div className="flex-1">
-                                    <h2 className="font-semibold text-sm md:text-base">
-                                        {item.title}
-                                    </h2>
-                                    <p className="text-cyan-700 font-bold">
-                                        ₹{item.price}
-                                    </p>
+                            console.log("CART ITEM:", item);
+                            console.log("CART ITEM _ID:", item?._id);
+                            console.log("CART ITEM _cartKey:", item?._cartKey);
+                                                
+                            if (!item || !item._cartKey) return null;
 
-                                    {/* QUANTITY CONTROLS */}
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <button
-                                            onClick={() =>
-                                                dispatch(
-                                                    updateQuantity({
-                                                        id: item.id,
-                                                        qty: item.qty - 1,
-                                                    })
-                                                )
-                                            }
-                                            className="px-3 py-1 bg-gray-300 rounded"
-                                        >
-                                            -
-                                        </button>
-
-                                        <span className="px-3 py-1 bg-gray-100 rounded">
-                                            {item.qty}
-                                        </span>
-
-                                        <button
-                                            onClick={() =>
-                                                dispatch(
-                                                    updateQuantity({
-                                                        id: item.id,
-                                                        qty: item.qty + 1,
-                                                    })
-                                                )
-                                            }
-                                            className="px-3 py-1 bg-gray-300 rounded"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* REMOVE */}
-                                <button
-                                    onClick={() => dispatch(removeFromCart(item.id))}
-                                    className="text-red-600 font-semibold hover:text-red-800"
+                            return (
+                                <div
+                                    key={item._cartKey}
+                                    className="flex items-center gap-4 p-4 shadow-md rounded-xl bg-white"
                                 >
-                                    Remove
-                                </button>
-                            </div>
-                        ))}
+                                    <img
+                                        src={`http://127.0.0.1:8000${item.image}`}
+                                        alt={item.title}
+                                        className="w-20 h-20 rounded-md object-cover"
+                                    />
+
+                                    <div className="flex-1">
+                                        <h2 className="font-semibold">
+                                            {item.title}
+                                        </h2>
+
+                                        <p className="text-cyan-700 font-bold">
+                                            ₹{item.price}
+                                        </p>
+
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <button
+                                                onClick={() =>
+                                                    dispatch(
+                                                        updateQuantity({
+                                                            _cartKey: item._cartKey,
+                                                            qty: item.qty - 1,
+                                                        })
+                                                    )
+                                                }
+                                                className="px-3 py-1 bg-gray-300 rounded"
+                                            >
+                                                -
+                                            </button>
+
+                                            <span className="px-3 py-1 bg-gray-100 rounded">
+                                                {item.qty}
+                                            </span>
+
+                                            <button
+                                                onClick={() =>
+                                                    dispatch(
+                                                        updateQuantity({
+                                                            _cartKey: item._cartKey,
+                                                            qty: item.qty + 1,
+                                                        })
+                                                    )
+                                                }
+                                                className="px-3 py-1 bg-gray-300 rounded"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() =>
+                                            dispatch(removeFromCart(item._cartKey))
+                                        }
+                                        className="text-red-600 font-semibold"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    {/* RIGHT SUMMARY */}
                     <div className="bg-white shadow-lg rounded-xl p-5 h-fit">
-                        <h2 className="text-xl font-bold mb-3">Order Summary</h2>
+                        <h2 className="text-xl font-bold mb-3">
+                            Order Summary
+                        </h2>
 
                         <p className="text-lg font-semibold">
-                            Total:{" "}
-                            <span className="text-cyan-700">
+                            Total:
+                            <span className="text-cyan-700 ml-1">
                                 ₹{cartTotal}
                             </span>
                         </p>
 
                         <button
-                            className="w-full bg-cyan-600 text-white py-2 rounded-lg mt-4
-                                hover:bg-cyan-700 active:scale-95 transition"
+                            className="w-full bg-cyan-600 text-white py-2 rounded-lg mt-4"
                             onClick={() => navigate("/checkout")}
                         >
                             Proceed to Checkout

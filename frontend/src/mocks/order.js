@@ -1,118 +1,46 @@
-import axios from 'axios';
+// src/mocks/order.js
+import axios from "axios";
+import { getAuthToken } from "../utils/auth";
 
-class OrderAPI{
-    createOrder = async (order) => {
-        try {
-            const token = JSON.parse(localStorage.getItem("userInfo")).token;
+const API = axios.create({
+    baseURL: "http://127.0.0.1:8000/api/orders",
+    headers: { "Content-Type": "application/json" },
+});
 
-            const config = {
-                headers : {
-                    "Content-type" : "application/json",
-                    Authorization : `Bearer ${token}`,
+API.interceptors.request.use((config) => {
+    const token = getAuthToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
 
-                },
-            };
-            const { data } = await axios.post(`/api/orders/add/`, order, config);
-            return data;
-        } catch (error) {
-            throw error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message;
-        }
-    };
+class OrderAPI {
+    async createOrder(order) {
+        const res = await API.post("/create-order/", order);
+        return res.data;
+    }
 
-    getOrderDetails = async (id) => {
-        try {
-            const token = JSON.parse(localStorage.getItem("userInfo")).token;
+    async verifyPayment(payload) {
+        const res = await API.post("/verify-payment/", payload);
+        return res.data;
+    }
 
-            const config = {
-                headers : {
-                    'Content-type' : "application/json",
-                    Authorization : `Bearer ${token}`,
-                },
+    async listMyOrders() {
+        const res = await API.get("/myorders/");
+        return res.data;
+    }
 
-            };
+    async getOrderDetails(id) {
+        const res = await API.get(`/${id}/`);
+        return res.data;
+    }
 
-            const { data } = await axios.get(`/api/orders/${id}/`, config);
-            return data;
-        } catch (error) {
-            throw error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message;
-        }
-    };
+    async downloadInvoice(id) {
+    const res = await API.get(`/${id}/invoice/`, {
+        responseType: "blob",  // Very important for PDFs
+    });
+    return res.data;
+    }
 
-    payOrder = async (id, paymentResult) => {
-        try {
-            const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-            const config = {
-                headers: {
-                    'Content-type' : "applicaton/json",
-                    Authorization : `Bearer ${token}`,
-                },
-            };
-
-            const { data } = await axios.put(
-                `/api/orders/${id}/pay` ,
-                paymentResult,
-                config
-            );
-
-            return data;
-        } catch (error) {
-            throw error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message;
-        }
-    };
-
-    listMyOrders = async() =>{
-        try {
-            const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-            const config = {
-                headers: {
-                    "Content-type" : "application/json",
-                    Authorization : `Bearer ${token}`,
-                },
-            };
-
-            const { data } = await axios.get(`/api/orders/myorders`, config);
-            return data;
-        } catch (error) {
-            throw error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message;
-        }
-    };
-
-    deliverOrder = async (order) =>{
-        try {
-            const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-            const config = {
-                headers : {
-                    "Content-type" : "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-
-            const { data }  = await axios.put(
-                `/api/orders/${order._id}/deliver/`, 
-                {}, 
-                config
-            );
-
-            return data;
-        } catch (error) {
-            throw error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message
-        }
-    };
 }
 
-const orderAPI = new OrderAPI();
-
-export default orderAPI;
+export default new OrderAPI();

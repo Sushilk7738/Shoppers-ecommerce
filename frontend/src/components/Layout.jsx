@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutSuccess } from "../redux/slices/userSlice";
+import { logout } from "../redux/slices/userSlice";
 import { clearCart } from "../redux/slices/cartSlice";
 
 const Layout = ({ children }) => {
@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
     const dispatch = useDispatch();
 
     // USER FROM REDUX
-    const user = useSelector((state) => state.user.userDetails);
+    const user = useSelector((state) => state.user.user);
 
     // CART COUNT FROM REDUX
     const totalItems = useSelector(
@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
 
     const handleLogout = () => {
         // clear user (redux + localStorage)
-        dispatch(logoutSuccess());
+        dispatch(logout());
         // clear cart (redux + localStorage)
         dispatch(clearCart());
         navigate("/");
@@ -102,6 +102,14 @@ return (
                 Hello, {displayName}
                 </span>
 
+                <Link
+                    to="/my-orders"
+                    className="py-2 px-4 rounded-md text-sm font-semibold border border-cyan-500 text-cyan-700 hover:bg-cyan-600 hover:text-white transition-all"
+                >
+                My Orders
+                </Link>
+                
+
                 {/* LOGOUT */}
                 <button
                 onClick={handleLogout}
@@ -162,6 +170,14 @@ return (
                 <span className="font-semibold">
                     Hello, {displayName}
                 </span>
+
+                <Link
+                    to="/my-orders"
+                    className="block py-2 px-2 rounded-md text-base"
+                    onClick={() => setOpen(false)}
+                >
+                📦 My Orders
+                </Link>
 
                 <button
                     className="text-red-500 font-semibold"
