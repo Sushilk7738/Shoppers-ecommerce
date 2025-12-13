@@ -1,30 +1,27 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.models import Order, ShippingAddress, Product, OrderItem
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
+from django.conf import settings
+
+import razorpay
+
+from api.utils.order_utils import create_order_from_cart
 from api.view.invoice_views import generate_invoice_pdf_bytes
 from api.utils.email_utils import send_order_success_email
-from django.conf import settings
-import razorpay
-import os
 
 
+# Razorpay client
 client = razorpay.Client(auth=(
     settings.RAZORPAY_KEY_ID,
     settings.RAZORPAY_KEY_SECRET
 ))
 
 
+#  Create Razorpay Order
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_order(request):
-    print("KEY CHECK:", settings.RAZORPAY_KEY_ID)
-    print("AUTH HEADER RECEIVED:", request.META.get('HTTP_AUTHORIZATION'))
-    print("USER AUTHENTICATED:", request.user, request.user.is_authenticated)
-
     try:
         amount = request.data.get("amount")
 
@@ -33,107 +30,89 @@ def create_order(request):
 
         amount_in_paisa = int(amount) * 100
 
-        # Create Razorpay order
         razorpay_order = client.order.create({
             "amount": amount_in_paisa,
             "currency": "INR",
             "payment_capture": 1,
         })
 
-        response_data = {
+        return Response({
             "id": razorpay_order["id"],
             "amount": razorpay_order["amount"],
             "currency": razorpay_order["currency"],
-            "key": settings.RAZORPAY_KEY_ID,   
-        }
-
-        print("RESPONSE SENT TO FRONTEND:", response_data)
-
-        return Response(response_data, status=200)
+            "key": settings.RAZORPAY_KEY_ID,
+        }, status=200)
 
     except Exception as e:
-        print("RAZORPAY ERROR:", e)
         return Response({"detail": str(e)}, status=500)
-    
-    
 
+
+# Verify Payment 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_payment(request):
+    """
+    Razorpay signature verify + order save
+    Business logic unchanged
+    """
     try:
-        print("\n---- VERIFY PAYMENT HIT ----")
-        print("AUTH HEADER:", request.headers.get("Authorization"))
         data = request.data
-        print("CLIENT SENT:", data)
 
+        # Razorpay response fields
+        razorpay_order_id = data.get("razorpay_order_id")
+        razorpay_payment_id = data.get("razorpay_payment_id")
+        razorpay_signature = data.get("razorpay_signature")
+
+        if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+            return Response({"detail": "Invalid payment data"}, status=400)
+
+        #Verify signature
+        try:
+            client.utility.verify_payment_signature({
+                "razorpay_order_id": razorpay_order_id,
+                "razorpay_payment_id": razorpay_payment_id,
+                "razorpay_signature": razorpay_signature,
+            })
+        except razorpay.errors.SignatureVerificationError:
+            return Response(
+                {"detail": "Payment verification failed"},
+                status=400
+            )
+
+        # Order data
         amount = data.get("amount")
         address_data = data.get("address")
         cart_items = data.get("cartItems", [])
 
-        order = Order.objects.create(
+        if not amount or not cart_items:
+            return Response({"detail": "Invalid order data"}, status=400)
+
+        # Create order
+        order = create_order_from_cart(
             user=request.user,
-            paymentMethod="Razorpay",
-            totalPrice=amount,
-            isPaid=True,
-            paidAt=timezone.now(),
+            payment_method="Razorpay",
+            total_price=amount,
+            cart_items=cart_items,
+            shipping_address=address_data,
+            mark_paid=True,
         )
 
-        print("ORDER CREATED WITH ID:", order._id)
-        print("ALL PRODUCTS IN DB:", list(Product.objects.values("_id", "name")))
-
-        for item in cart_items:
-            raw_id = item.get("_id") or item.get("id")
-            print("ITEM ID RAW:", raw_id, type(raw_id))
-
-            product = None
-            if raw_id is not None:
-                try:
-                    product = Product.objects.get(_id=int(raw_id))
-                except Product.DoesNotExist:
-                    print(f"⚠ Product with _id {raw_id} NOT found. Saving line without FK.")
-
-            OrderItem.objects.create(
-                product=product,          
-                order=order,
-                name=item["title"],
-                qty=item["qty"],
-                price=item["price"],
-                image=item["image"],
-            )
-
-        ShippingAddress.objects.create(
-            order=order,
-            address=address_data["address"],
-            city="",
-            postalCode="000000",
-            country="India",
-            shippingPrice=0,
-        )
-
-        print("SHIPPING ADDRESS SAVED")
-        
-        # ---------------- SEND EMAIL WITH INVOICE ----------------
+        # email + invoice
         try:
             pdf_bytes = generate_invoice_pdf_bytes(order, request.user)
-
             if pdf_bytes and request.user.email:
                 send_order_success_email(
                     user_email=request.user.email,
                     order_id=order._id,
                     pdf_content=pdf_bytes
                 )
-                print("✉️Order confirmation email sent")
-
-        except Exception as email_error:
-            # Email failure must NOT affect order
-            print("❌ Email sending failed:", email_error)
-
+        except Exception:
+            pass
 
         return Response({
-            "msg": "order saved",
+            "msg": "payment verified & order saved",
             "order_id": order._id
         }, status=200)
 
     except Exception as e:
-        print("PAYMENT VERIFY ERROR:", str(e))
         return Response({"error": str(e)}, status=500)

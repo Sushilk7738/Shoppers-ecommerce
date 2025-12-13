@@ -12,15 +12,17 @@ from decouple import Config, RepositoryEnv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-^%2peta=@f#n_0dn9zd&=sfv4hz-1ue&6j5c8bi7lmi!#m_c!s'
+
 config = Config(
     RepositoryEnv(BASE_DIR / ".env")
 )
 
+SECRET_KEY = config("SECRET_KEY")
+
 # SECURITY
 
-DEBUG = True
-ALLOWED_HOSTS = []  
+DEBUG = config("DEBUG", cast=bool)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
 
 # APPLICATIONS
 
@@ -52,7 +54,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
 # URLS / WSGI
 

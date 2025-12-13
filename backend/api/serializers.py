@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import *
+
+from .models import Product, Review, Order, OrderItem, ShippingAddress, Contact
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', '_id', 'username', 'email', 'name', 'isAdmin']
+        fields = ["id", "_id", "username", "email", "name", "isAdmin"]
 
     def get__id(self, obj):
         return obj.id
@@ -20,8 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.is_staff
 
     def get_name(self, obj):
-        name = obj.first_name
-        return name if name else obj.email
+        return obj.first_name if obj.first_name else obj.email
 
 
 class UserSerializerWithToken(UserSerializer):
@@ -29,7 +29,7 @@ class UserSerializerWithToken(UserSerializer):
 
     class Meta:
         model = User
-        fields = ['id', '_id', 'username', 'email', 'name', 'isAdmin', 'token']
+        fields = ["id", "_id", "username", "email", "name", "isAdmin", "token"]
 
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)
@@ -39,19 +39,39 @@ class UserSerializerWithToken(UserSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            '_id', 'name', 'image', 'brand', 'category', 'description',
-            'price', 'discount', 'offer_price', 'countInStock',
-            'rating', 'numReviews', 'reviews', 'createdAt'
+            "_id",
+            "name",
+            "image",
+            "brand",
+            "category",
+            "description",
+            "price",
+            "discount",
+            "offer_price",
+            "countInStock",
+            "rating",
+            "numReviews",
+            "reviews",
+            "createdAt",
         ]
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if not obj.image:
+            return None
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+        return obj.image.url
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()
@@ -61,7 +81,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class ShippingAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
-        fields = '__all__'
+        fields = "__all__"
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -69,12 +89,17 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = '__all__'
+        fields = "__all__"
 
     def get_image(self, obj):
+        request = self.context.get("request")
         if not obj.image:
             return None
-        return f"/media/{obj.image}" if not obj.image.startswith("/") else obj.image
+        if obj.image.startswith("http"):
+            return obj.image
+        if request:
+            return request.build_absolute_uri(obj.image)
+        return obj.image
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -88,10 +113,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_orderItems(self, obj):
         items = obj.orderitem_set.all()
-        return OrderItemSerializer(items, many=True).data
+        return OrderItemSerializer(items, many=True, context=self.context).data
 
     def get_ShippingAddress(self, obj):
-        if hasattr(obj, 'shippingaddress'):
+        if hasattr(obj, "shippingaddress"):
             return ShippingAddressSerializer(obj.shippingaddress, many=False).data
         return None
 
@@ -102,4 +127,4 @@ class OrderSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = '__all__'
+        fields = "__all__"
