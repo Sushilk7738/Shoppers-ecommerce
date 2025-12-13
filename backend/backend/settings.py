@@ -5,17 +5,13 @@ Django settings for backend project.
 from pathlib import Path
 from datetime import timedelta
 import os
+from decouple import config
 
-from decouple import Config, RepositoryEnv
 
 # BASE DIR & ENV
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-config = Config(
-    RepositoryEnv(BASE_DIR / ".env")
-)
 
 SECRET_KEY = config("SECRET_KEY")
 
