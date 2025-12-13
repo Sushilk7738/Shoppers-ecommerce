@@ -4,15 +4,18 @@ from rest_framework.response import Response
 from api.models import Order, ShippingAddress, Product, OrderItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from api.view.invoice_views import generate_invoice_pdf_bytes
+from api.utils.email_utils import send_order_success_email
 from django.conf import settings
 import razorpay
 import os
 
 
 client = razorpay.Client(auth=(
-    os.getenv("RAZORPAY_KEY_ID"),
-    os.getenv("RAZORPAY_KEY_SECRET")
+    settings.RAZORPAY_KEY_ID,
+    settings.RAZORPAY_KEY_SECRET
 ))
+
 
 
 @api_view(["POST"])
@@ -30,7 +33,7 @@ def create_order(request):
 
         amount_in_paisa = int(amount) * 100
 
-        # ✅ Create Razorpay order
+        # Create Razorpay order
         razorpay_order = client.order.create({
             "amount": amount_in_paisa,
             "currency": "INR",
@@ -41,7 +44,7 @@ def create_order(request):
             "id": razorpay_order["id"],
             "amount": razorpay_order["amount"],
             "currency": razorpay_order["currency"],
-            "key": settings.RAZORPAY_KEY_ID,   # ✅ THIS IS THE FIX
+            "key": settings.RAZORPAY_KEY_ID,   
         }
 
         print("RESPONSE SENT TO FRONTEND:", response_data)
@@ -108,6 +111,23 @@ def verify_payment(request):
         )
 
         print("SHIPPING ADDRESS SAVED")
+        
+        # ---------------- SEND EMAIL WITH INVOICE ----------------
+        try:
+            pdf_bytes = generate_invoice_pdf_bytes(order, request.user)
+
+            if pdf_bytes and request.user.email:
+                send_order_success_email(
+                    user_email=request.user.email,
+                    order_id=order._id,
+                    pdf_content=pdf_bytes
+                )
+                print("✉️Order confirmation email sent")
+
+        except Exception as email_error:
+            # Email failure must NOT affect order
+            print("❌ Email sending failed:", email_error)
+
 
         return Response({
             "msg": "order saved",

@@ -6,6 +6,7 @@ from xhtml2pdf import pisa
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from io import BytesIO
 
 from api.models import Order
 
@@ -103,3 +104,67 @@ def generate_invoice(request, pk):
         return Response({"detail": "Error generating PDF", "pisa_errors": True}, status=500)
 
     return response
+
+
+
+
+def generate_invoice_pdf_bytes(order, user):
+    template = get_template('invoice_template.html')
+
+    clean_order = {
+        "id": order._id,
+        "created": order.createdAt.isoformat() if getattr(order, "createdAt", None) else "",
+        "paymentMethod": getattr(order, "paymentMethod", None),
+        "isPaid": bool(getattr(order, "isPaid", False)),
+        "isDelivered": bool(getattr(order, "isDelivered", False)),
+        "taxPrice": float(getattr(order, "taxPrice", 0) or 0),
+        "shippingPrice": float(getattr(order, "shippingPrice", 0) or 0),
+        "itemsPrice": float(getattr(order, "totalPrice", 0) or 0)
+                    - float(getattr(order, "shippingPrice", 0) or 0),
+        "total": float(getattr(order, "totalPrice", 0) or 0),
+    }
+
+    items = []
+    for item in order.orderitem_set.all():
+        items.append({
+            "name": item.name,
+            "qty": int(item.qty or 0),
+            "price": float(item.price or 0),
+            "image": item.image or "",
+            "line_total": round(float(item.price or 0) * int(item.qty or 0), 2),
+        })
+
+    shipping = None
+    if hasattr(order, "shippingaddress") and order.shippingaddress:
+        sa = order.shippingaddress
+        shipping = {
+            "name": getattr(sa, "name", "") or getattr(user, "username", ""),
+            "address": getattr(sa, "address", ""),
+            "city": getattr(sa, "city", ""),
+            "postalCode": getattr(sa, "postalCode", ""),
+            "country": getattr(sa, "country", ""),
+        }
+
+    logo_fs = os.path.join(settings.BASE_DIR, "api", "static", "logo.png")
+    logo_path = f"file://{logo_fs}" if os.path.exists(logo_fs) else ""
+
+    template = get_template("invoice_template.html")
+    html = template.render({
+        "order": clean_order,
+        "items": items,
+        "shipping": shipping,
+        "user": user,
+        "logo_path": logo_path,
+    })
+
+    result = BytesIO()
+    pisa_status = pisa.CreatePDF(
+        html,
+        dest=result,
+        link_callback=link_callback
+    )
+
+    if pisa_status.err:
+        return None
+
+    return result.getvalue()
