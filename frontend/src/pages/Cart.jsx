@@ -2,6 +2,9 @@ import Layout from "../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateQuantity } from "../redux/slices/cartSlice";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../utils/image";
+
+
 
 const Cart = () => {
     const dispatch = useDispatch();
@@ -46,7 +49,7 @@ const Cart = () => {
                                     className="flex items-center gap-4 p-4 shadow-md rounded-xl bg-white"
                                 >
                                     <img
-                                        src={`http://127.0.0.1:8000${item.image}`}
+                                        src={getImageUrl(item.image)}
                                         alt={item.title}
                                         className="w-20 h-20 rounded-md object-cover"
                                     />

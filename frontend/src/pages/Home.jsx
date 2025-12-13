@@ -1,17 +1,18 @@
-// src/pages/Home.jsx
-
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
 import { fetchProductList } from "../redux/slices/productSlice";
 import { addToCart } from "../redux/slices/cartSlice";
-import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../utils/image";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "animate.css";
 
 const Home = () => {
 const dispatch = useDispatch();
@@ -24,149 +25,143 @@ useEffect(() => {
     dispatch(fetchProductList());
 }, [dispatch]);
 
-// ======================
-// ADD TO CART (Redux)
-// ======================
-const handleAddToCart = (product) => {
-    dispatch(addToCart({ ...product, qty: 1 }));
+const getFinalPrice = (product) => {
+    if (product.offer_price) return product.offer_price;
+    if (product.discount)
+    return Math.round(
+        product.price - (product.price * product.discount) / 100
+    );
+    return product.price;
 };
 
-// ======================
-// BUY NOW (Redux + Navigate)
-// ======================
-const handleBuyNow = (product) => {
-    dispatch(addToCart({ ...product, qty: 1 }));
+const addItem = (product) => {
+    dispatch(
+    addToCart({
+        _id: product._id,
+        title: product.name,
+        price: getFinalPrice(product),
+        originalPrice: product.price,
+        image: product.image,
+        qty: 1,
+    })
+    );
+};
+
+const buyNow = (product) => {
+    addItem(product);
     navigate("/checkout");
-};
-
-const getImageURL = (image) => {
-    return image ? `http://127.0.0.1:8000${image}` : "/images/placeholder.png";
-};
-
-const calculateFinalPrice = (price, discount, offerPrice) => {
-    const p = Number(price) || 0;
-    const d = Number(discount) || 0;
-    const op = Number(offerPrice) || null;
-
-    if (op) return op;
-    if (d > 0) return Math.round(p - (p * d) / 100);
-
-    return p;
 };
 
 return (
     <Layout>
-        <div>
+    <div className="bg-white">
+        <header className="mb-14">
+        <Swiper
+            slidesPerView={1}
+            navigation
+            pagination
+            modules={[Navigation, Pagination]}
+        >
+            <SwiperSlide>
+            <img src="/p4.jpg" className="w-full h-[420px] object-cover" />
+            </SwiperSlide>
+            <SwiperSlide>
+            <img src="/p2.jpg" className="w-full h-[420px] object-cover" />
+            </SwiperSlide>
+            <SwiperSlide>
+            <img src="/p3.jpg" className="w-full h-[420px] object-cover" />
+            </SwiperSlide>
+        </Swiper>
+        </header>
 
-            {/* ================= HERO SLIDER ================= */}
-            <header>
-            <Swiper
-                pagination={true}
-                navigation={true}
-                modules={[Navigation, Pagination]}
-                slidesPerView={1}
-            >
-                <SwiperSlide><img src="/p4.jpg" alt="banner-1" /></SwiperSlide>
-                <SwiperSlide><img src="/p2.jpg" alt="banner-2" /></SwiperSlide>
-                <SwiperSlide><img src="/p3.jpg" alt="banner-3" /></SwiperSlide>
-                <SwiperSlide><img src="/p.jpg" alt="banner-4" /></SwiperSlide>
-            </Swiper>
-            </header>
+        <section className="px-6 md:px-16 pb-20">
+        <h1 className="text-3xl font-bold text-center mb-2">
+            Latest Products
+        </h1>
+        <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16">
+            Discover the latest arrivals curated just for you.
+        </p>
 
-            <div className="md:p-16 p-8 bg-white">
-            <h1 className="text-3xl font-bold text-center">Latest Products</h1>
-            <p className="text-center text-gray-600 md:w-7/12 mx-auto mt-2 mb-16">
-                Here is where we’ll show our latest products fetched from the backend.
-            </p>
+        {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                key={i}
+                className="h-[350px] bg-gray-100 rounded-xl animate-pulse"
+                />
+            ))}
+            </div>
+        )}
 
-            <div className="md:w-10/12 mx-auto grid gap-12 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-
-                {loading &&
-                Array.from({ length: 8 }).map((_, i) => (
-                    <div
-                    key={`skeleton-${i}`}
-                    className="bg-white shadow-lg rounded-xl overflow-hidden animate-pulse"
-                    >
-                    <div className="w-full h-48 bg-gray-200" />
-                    <div className="p-4 space-y-3">
-                        <div className="h-4 bg-gray-200 rounded w-3/4" />
-                        <div className="h-3 bg-gray-200 rounded w-1/2" />
-                        <div className="h-10 bg-gray-200 rounded w-full" />
-                        <div className="h-10 bg-gray-200 rounded w-full" />
-                    </div>
-                    </div>
-                ))}
-
-                {!loading && products.length === 0 && (
-                <div className="col-span-full text-center py-16 text-gray-600">
-                    No products found.
+        {!loading && products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.slice(0, 4).map((product, index) => (
+                <div
+                key={product._id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden
+                            animate__animated animate__fadeInUp
+                            transition-all duration-300
+                            hover:-translate-y-1 hover:shadow-2xl"
+                style={{ animationDelay: `${index * 0.08}s` }}
+                >
+                <div className="h-64 overflow-hidden">
+                    <img
+                    src={getImageUrl(product.image)}
+                    className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                    />
                 </div>
-                )}
 
-                {!loading &&
-                products.slice(0, 4).map((product) => {
-                    const originalPrice = Number(product.price) || 0;
-                    const discount = Number(product.discount) || 0;
-                    const offerPrice = Number(product.offer_price) || null;
+                <div className="p-4">
+                    <h2 className="font-semibold text-gray-900 truncate">
+                    {product.name}
+                    </h2>
 
-                    const finalPrice = calculateFinalPrice(
-                    originalPrice,
-                    discount,
-                    offerPrice
-                    );
+                    <div className="mt-2 flex items-center gap-2">
+                    <span className="text-lg font-bold text-green-600">
+                        ₹{getFinalPrice(product)}
+                    </span>
 
-                    return (
-                    <div
-                        key={product._id || product.id}
-                        className="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-[350px]"
-                    >
-                        <img
-                        src={getImageURL(product.image)}
-                        alt={product.name}
-                        className="w-full h-64 object-contain bg-white"
-                        />
+                    {(product.discount || product.offer_price) && (
+                        <span className="text-sm text-gray-500 line-through">
+                        ₹{product.price}
+                        </span>
+                    )}
 
-                        <div className="p-4">
-                        <h1 className="text-lg font-semibold truncate">
-                            {product.name}
-                        </h1>
-
-                        <div className="mt-2 flex items-center space-x-2">
-                            <span className="text-green-600 font-bold text-lg">
-                            ₹{finalPrice}
-                            </span>
-
-                            {(discount > 0 || offerPrice) && originalPrice > 0 && (
-                            <>
-                                <del className="text-gray-500">₹{originalPrice}</del>
-                                <span className="text-gray-600 text-sm">
-                                ({discount}% OFF)
-                                </span>
-                            </>
-                            )}
-                        </div>
-
-                        <button
-                            onClick={() => handleBuyNow(product)}
-                            className="bg-green-500 py-2 w-full rounded text-white font-semibold mt-4"
-                        >
-                            Buy Now
-                        </button>
-
-                        <button
-                            onClick={() => handleAddToCart(product)}
-                            className="bg-rose-500 py-2 w-full rounded text-white font-semibold mt-2 flex items-center justify-center"
-                        >
-                            <i className="ri-shopping-cart-line mr-2"></i>
-                            Add to Cart
-                        </button>
-                        </div>
+                    {product.discount && (
+                        <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full animate__animated animate__pulse animate__infinite">
+                        {product.discount}% OFF
+                        </span>
+                    )}
                     </div>
-                    );
-                })}
+
+                    <div className="mt-4 space-y-2">
+                    <button
+                        onClick={() => buyNow(product)}
+                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                    >
+                        Buy Now
+                    </button>
+
+                    <button
+                        onClick={() => addItem(product)}
+                        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                    >
+                        Add to Cart
+                    </button>
+                    </div>
+                </div>
+                </div>
+            ))}
             </div>
-            </div>
-        </div>
+        )}
+
+        {!loading && products.length === 0 && (
+            <p className="text-center text-gray-500 py-20">
+            No products available.
+            </p>
+        )}
+        </section>
+    </div>
     </Layout>
 );
 };
