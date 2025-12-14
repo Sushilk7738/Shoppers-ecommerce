@@ -24,17 +24,20 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 def create_admin_once(request):
-    if User.objects.filter(username="admin").exists():
-        return JsonResponse({"status": "already exists"})
+    from django.contrib.auth.models import User
 
-    User.objects.create_superuser(
+    user, created = User.objects.get_or_create(
         username="admin",
-        email="admin@test.com",
-        password="admin123"
+        defaults={
+            "email": "admin@test.com",
+            "is_staff": True,
+            "is_superuser": True,
+        },
     )
-    return JsonResponse({"status": "admin created"})
+    user.set_password("admin123")
+    user.save()
 
-
+    return JsonResponse({"status": "admin password reset"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
