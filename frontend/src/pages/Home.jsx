@@ -40,10 +40,10 @@ const Home = () => {
             if (!product) return;
             dispatch(
                 addToCart({
-                    _id: product._id,
+                    _id: product._id ?? product.id,
                     title: product.name,
-                    price: getFinalPrice(product),
-                    originalPrice: product.price,
+                    price: Number(getFinalPrice(product)),
+                    originalPrice: Number(product.price),
                     image: product.image,
                     qty: 1,
                 })
