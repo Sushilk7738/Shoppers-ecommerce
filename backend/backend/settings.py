@@ -3,16 +3,17 @@ from datetime import timedelta
 import os
 from decouple import config
 
-# base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# security
+# basic security
 SECRET_KEY = config("SECRET_KEY", default="unsafe-secret")
-DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1,shoppers-ecommerce-backend.onrender.com"
-).split(",")
+DEBUG = config("DEBUG", default=True, cast=bool)
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "shoppers-ecommerce-backend.onrender.com",
+]
 
 # apps
 INSTALLED_APPS = [
@@ -27,9 +28,9 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "corsheaders",
-    
-    'cloudinary',
-    'cloudinary_storage',
+
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 # middleware
@@ -52,7 +53,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://shoppers-ecommerce-frontend.onrender.com",
 ]
 
-# urls
 ROOT_URLCONF = "backend.urls"
 WSGI_APPLICATION = "backend.wsgi.application"
 
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-# database
+# database (sqlite for demo)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -81,7 +81,7 @@ DATABASES = {
     }
 }
 
-# passwords
+# password validators
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -89,27 +89,25 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# i18n
+# locale
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# static
+# static files
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# media
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
+# media (cloudinary)
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
-# default
+# defaults
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# rest
+# rest framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -136,24 +134,27 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = f"Shoppers <{EMAIL_HOST_USER}>"
 
-
-#clodinary
-
+# cloudinary
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
 cloudinary.config(
-    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
     api_key=os.environ.get("CLOUDINARY_API_KEY"),
     api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
 )
 
+# admin session stability (render + sqlite)
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_AGE = 60 * 60 * 24
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 CSRF_TRUSTED_ORIGINS = [
     "https://shoppers-ecommerce-backend.onrender.com",
