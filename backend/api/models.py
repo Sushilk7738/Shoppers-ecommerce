@@ -7,7 +7,7 @@ from django.db.models.fields import BLANK_CHOICE_DASH
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200)
-    image = models.ImageField(null=True, blank=True, default='images/placeholder.png', upload_to='images/')
+    image = models.ImageField(null=True, blank=True,  upload_to='images/')
     brand = models.CharField(max_length=200)
     category = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
