@@ -66,12 +66,7 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def get_image(self, obj):
-        request = self.context.get("request")
-        if not obj.image:
-            return None
-        if request:
-            return request.build_absolute_uri(obj.image.url)
-        return obj.image.url
+        return obj.image
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()
