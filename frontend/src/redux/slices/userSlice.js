@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { saveUserInfo, clearUserInfo, getUserInfo } from "../../utils/auth";
+import { saveUserInfo, clearUserInfo, getUserInfo } from "../../utils/Auth";
 
 const initialState = {
     user: getUserInfo(),
