@@ -2,19 +2,16 @@ export const getImageUrl = (image) => {
     if (!image) return "/placeholder.png";
 
     const base = import.meta.env.VITE_API_URL;
+    const src = String(image);
 
-    // already absolute
-    if (image.startsWith("http")) return image;
+    // already full URL (Cloudinary etc.)
+    if (src.startsWith("http")) return src;
 
-    // ensure leading slash
-    if (!image.startsWith("/")) {
-        image = `/${image}`;
+    // absolute path from backend
+    if (src.startsWith("/")) {
+        return `${base}${src}`;
     }
 
-    // handle media path
-    if (!image.startsWith("/media/")) {
-        image = `/media${image}`;
-    }
-
-    return `${base}${image}`;
+    // relative path fallback
+    return `${base}/${src}`;
 };

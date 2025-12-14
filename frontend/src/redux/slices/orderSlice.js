@@ -1,27 +1,33 @@
-// src/redux/slices/orderSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import orderAPI from "../../mocks/order";
+import { normalizeOrder } from "../../utils/normalize";
 
-// Fetch My Orders
+// fetch my orders
 export const fetchMyOrders = createAsyncThunk(
     "order/fetchMyOrders",
     async (_, { rejectWithValue }) => {
         try {
-            return await orderAPI.listMyOrders();
+            const data = await orderAPI.listMyOrders();
+            return Array.isArray(data) ? data.map(normalizeOrder) : [];
         } catch (err) {
-            return rejectWithValue(err?.response?.data || err?.message || err);
+            return rejectWithValue(
+                err?.response?.data || err?.message || err
+            );
         }
     }
 );
 
-// Fetch Order Details
+// fetch single order details
 export const fetchOrderDetails = createAsyncThunk(
     "order/fetchOrderDetails",
     async (id, { rejectWithValue }) => {
         try {
-            return await orderAPI.getOrderDetails(id);
+            const data = await orderAPI.getOrderDetails(id);
+            return data ? normalizeOrder(data) : null;
         } catch (err) {
-            return rejectWithValue(err?.response?.data || err?.message || err);
+            return rejectWithValue(
+                err?.response?.data || err?.message || err
+            );
         }
     }
 );
@@ -37,21 +43,21 @@ const orderSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            // MY ORDERS
+            // my orders
             .addCase(fetchMyOrders.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(fetchMyOrders.fulfilled, (state, action) => {
                 state.loading = false;
-                state.orders = Array.isArray(action.payload) ? action.payload : [];
+                state.orders = action.payload;
             })
             .addCase(fetchMyOrders.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
 
-            // ORDER DETAILS
+            // order details
             .addCase(fetchOrderDetails.pending, (state) => {
                 state.loading = true;
                 state.error = null;

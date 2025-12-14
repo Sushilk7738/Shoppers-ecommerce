@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../components/Layout";
 import ProductCarousel from "../components/ProductCarousel";
@@ -7,22 +7,27 @@ import { fetchProductList } from "../redux/slices/productSlice";
 const Products = () => {
     const dispatch = useDispatch();
 
-    // state
-    const productState =
-        useSelector((state) => state.product.productList) || {};
-
     const {
         products = [],
         loading = false,
         error = null,
-    } = productState;
+    } = useSelector((state) => state.product.productList || {});
 
-    // fetch
+    // fetch once
     useEffect(() => {
         dispatch(fetchProductList());
     }, [dispatch]);
 
-    // loading
+    // group by category (safe + memoized)
+    const groupedProducts = useMemo(() => {
+        return products.reduce((acc, product) => {
+            const category = product?.category || "Others";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(product);
+            return acc;
+        }, {});
+    }, [products]);
+
     if (loading) {
         return (
             <Layout>
@@ -31,7 +36,6 @@ const Products = () => {
         );
     }
 
-    // error
     if (error) {
         return (
             <Layout>
@@ -43,14 +47,6 @@ const Products = () => {
             </Layout>
         );
     }
-
-    // group by category
-    const groupedProducts = products.reduce((acc, product) => {
-        const category = product?.category || "Others"; // guard
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(product);
-        return acc;
-    }, {});
 
     return (
         <Layout>

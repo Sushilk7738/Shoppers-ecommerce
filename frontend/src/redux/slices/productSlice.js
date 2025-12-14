@@ -1,11 +1,30 @@
-import { createSlice } from '@reduxjs/toolkit';
-import productAPI from '../../mocks/product';
+import { createSlice } from "@reduxjs/toolkit";
+import productAPI from "../../mocks/product";
+import { normalizeProduct } from "../../utils/normalize";
 
 const initialState = {
-    productList: { products: [], loading: false, error: null, page: 0, pages: 0 },
-    productDetails: { product: { reviews: [] }, loading: false, error: null },
-    createReview: { loading: false, error: null, success: false },
-    topRatedProducts: { products: [], loading: false, error: null },
+    productList: {
+        products: [],
+        loading: false,
+        error: null,
+        page: 0,
+        pages: 0,
+    },
+    productDetails: {
+        product: { reviews: [] },
+        loading: false,
+        error: null,
+    },
+    createReview: {
+        loading: false,
+        error: null,
+        success: false,
+    },
+    topRatedProducts: {
+        products: [],
+        loading: false,
+        error: null,
+    },
 };
 
 const productSlice = createSlice({
@@ -26,6 +45,7 @@ const productSlice = createSlice({
             state.productList.loading = false;
             state.productList.error = action.payload;
         },
+
         productDetailsRequest(state) {
             state.productDetails.loading = true;
             state.productDetails.error = null;
@@ -38,6 +58,7 @@ const productSlice = createSlice({
             state.productDetails.loading = false;
             state.productDetails.error = action.payload;
         },
+
         createReviewRequest(state) {
             state.createReview.loading = true;
             state.createReview.error = null;
@@ -51,6 +72,7 @@ const productSlice = createSlice({
             state.createReview.loading = false;
             state.createReview.error = action.payload;
         },
+
         productTopRequest(state) {
             state.topRatedProducts.loading = true;
             state.topRatedProducts.error = null;
@@ -81,46 +103,89 @@ export const {
     productTopFailure,
 } = productSlice.actions;
 
-export const fetchProductList = (keyword="", pageNumber = "") => async (dispatch) => {
-    try {
-        dispatch(productListRequest());
-        // const productList = await productAPI.getProductList(keyword, pageNumber);
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/?search=${keyword}&page=${pageNumber}`);
-        const data = await res.json();
-        dispatch(productListSuccess(data));
-    } catch (error) {
-        dispatch(productListFailure(error.response?.data.detail || error.message));
-    }
-};
+// thunks
+
+export const fetchProductList =
+    (keyword = "", pageNumber = "") =>
+    async (dispatch) => {
+        try {
+            dispatch(productListRequest());
+
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/products/?search=${keyword}&page=${pageNumber}`
+            );
+            const data = await res.json();
+
+            const normalizedProducts = Array.isArray(data.products)
+                ? data.products.map(normalizeProduct)
+                : [];
+
+            dispatch(
+                productListSuccess({
+                    ...data,
+                    products: normalizedProducts,
+                })
+            );
+        } catch (error) {
+            dispatch(
+                productListFailure(
+                    error?.response?.data?.detail || error.message
+                )
+            );
+        }
+    };
 
 export const fetchProductDetails = (id) => async (dispatch) => {
     try {
         dispatch(productDetailsRequest());
+
         const productDetails = await productAPI.getProductDetails(id);
-        dispatch(productDetailsSuccess(productDetails));
+
+        dispatch(productDetailsSuccess(normalizeProduct(productDetails)));
     } catch (error) {
-        dispatch(productDetailsFailure(error.response?.data.detail || error.message));
+        dispatch(
+            productDetailsFailure(
+                error?.response?.data?.detail || error.message
+            )
+        );
     }
 };
 
-export const createReview = (productId, review) => async (dispatch) => {
-    try {
-        dispatch(createReviewRequest());
+export const createReview =
+    (productId, review) => async (dispatch) => {
+        try {
+            dispatch(createReviewRequest());
 
-        await productAPI.createProductReview(productId, review);
-        dispatch(createReviewSuccess());
-    } catch (error) {
-        dispatch(createReviewFailure(error.response?.data.detail || error.message));
-    }
-};
+            await productAPI.createProductReview(productId, review);
+
+            dispatch(createReviewSuccess());
+        } catch (error) {
+            dispatch(
+                createReviewFailure(
+                    error?.response?.data?.detail || error.message
+                )
+            );
+        }
+    };
 
 export const fetchTopRatedProducts = () => async (dispatch) => {
     try {
         dispatch(productTopRequest());
-        const topRatedProducts = await productAPI.getTopRatedProducts();
-        dispatch(productTopSuccess(topRatedProducts));
+
+        const topRatedProducts =
+            await productAPI.getTopRatedProducts();
+
+        const normalizedTopProducts = Array.isArray(topRatedProducts)
+            ? topRatedProducts.map(normalizeProduct)
+            : [];
+
+        dispatch(productTopSuccess(normalizedTopProducts));
     } catch (error) {
-        dispatch(productTopFailure(error.response?.data.detail || error.message));
+        dispatch(
+            productTopFailure(
+                error?.response?.data?.detail || error.message
+            )
+        );
     }
 };
 

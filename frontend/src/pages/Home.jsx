@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { fetchProductList } from "../redux/slices/productSlice";
 import { addToCart } from "../redux/slices/cartSlice";
-import { getImageUrl } from "../utils/image";
 
 // swiper
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -14,27 +13,19 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "animate.css";
 
-console.log("API_URL =", import.meta.env.VITE_API_URL);
-
-
 const Home = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // state
-    const productState = useSelector(
-        (state) => state.product.productList
-    ) || {};
+    const { products = [], loading = false } =
+        useSelector((state) => state.product.productList || {});
 
-    const { products = [], loading = false } = productState;
-
-    // fetch
     useEffect(() => {
         dispatch(fetchProductList());
     }, [dispatch]);
 
-    // price
-    const getFinalPrice = (product) => {
+    // SAME logic, memo-safe
+    const getFinalPrice = useCallback((product) => {
         if (product?.offer_price) return product.offer_price;
         if (product?.discount) {
             return Math.round(
@@ -42,22 +33,24 @@ const Home = () => {
             );
         }
         return product?.price || 0;
-    };
+    }, []);
 
-    // cart
-    const addItem = (product) => {
-        if (!product) return; // guard
-        dispatch(
-            addToCart({
-                _id: product._id,
-                title: product.name,
-                price: getFinalPrice(product),
-                originalPrice: product.price,
-                image: product.image,
-                qty: 1,
-            })
-        );
-    };
+    const addItem = useCallback(
+        (product) => {
+            if (!product) return;
+            dispatch(
+                addToCart({
+                    _id: product._id,
+                    title: product.name,
+                    price: getFinalPrice(product),
+                    originalPrice: product.price,
+                    image: product.image,
+                    qty: 1,
+                })
+            );
+        },
+        [dispatch, getFinalPrice]
+    );
 
     const buyNow = (product) => {
         addItem(product);
@@ -81,7 +74,7 @@ const Home = () => {
                                 src="/p4.jpg"
                                 alt="Banner 1"
                                 className="w-full h-[420px] object-cover"
-                                loading="lazy" // perf
+                                loading="lazy"
                             />
                         </SwiperSlide>
                         <SwiperSlide>
@@ -112,7 +105,6 @@ const Home = () => {
                         Discover the latest arrivals curated just for you.
                     </p>
 
-                    {/* LOADING */}
                     {loading && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                             {Array.from({ length: 8 }).map((_, idx) => (
@@ -124,7 +116,6 @@ const Home = () => {
                         </div>
                     )}
 
-                    {/* PRODUCTS GRID */}
                     {!loading && products.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                             {products.slice(0, 4).map((product, index) => (
@@ -134,16 +125,14 @@ const Home = () => {
                                         animate__animated animate__fadeInUp
                                         transition-all duration-300
                                         hover:-translate-y-1 hover:shadow-2xl"
-                                    style={{
-                                        animationDelay: `${index * 0.08}s`,
-                                    }}
+                                    style={{ animationDelay: `${index * 0.08}s` }}
                                 >
                                     <div className="h-64 overflow-hidden">
                                         <img
-                                            src={getImageUrl(product.image)}
+                                            src={product.image}
                                             alt={product.name}
                                             className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
-                                            loading="lazy" // perf
+                                            loading="lazy"
                                         />
                                     </div>
 
@@ -191,7 +180,6 @@ const Home = () => {
                         </div>
                     )}
 
-                    {/* EMPTY */}
                     {!loading && products.length === 0 && (
                         <p className="text-center text-gray-500 py-20">
                             No products available.
