@@ -6,21 +6,23 @@ import { useToast } from "../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "../redux/slices/cartSlice";
 
+const BASE_URL = import.meta.env.VITE_API_URL; // api
+
 const Checkout = () => {
 const { showToast } = useToast();
 const navigate = useNavigate();
 const dispatch = useDispatch();
 
-// ✅ CART
+// cart
 const cart = useSelector((state) => state.cart.cartItems) || [];
 
-// ✅ TOKEN
+// token
 const tokenFromStore = useSelector((state) => state.user.token);
 const token =
     tokenFromStore ||
     (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
-// ✅ FORM STATE
+// form
 const [form, setForm] = useState({
     fullName: "",
     mobile: "",
@@ -35,7 +37,7 @@ const cartTotal = cart.reduce(
     0
 );
 
-// ✅ VERIFY PAYMENT
+// verify
 const verifyPayment = async (response) => {
     const paymentData = {
     razorpay_payment_id: response.razorpay_payment_id,
@@ -48,7 +50,7 @@ const verifyPayment = async (response) => {
 
     try {
     const res = await fetch(
-        "http://127.0.0.1:8000/api/orders/verify-payment/",
+        `${BASE_URL}/api/orders/verify-payment/`,
         {
         method: "POST",
         headers: {
@@ -74,7 +76,7 @@ const verifyPayment = async (response) => {
     }
 };
 
-// ✅ CREATE ORDER
+// create order
 const createOrder = async () => {
     if (!token) {
     showToast("Please login before checkout");
@@ -88,7 +90,7 @@ const createOrder = async () => {
 
     try {
     const response = await fetch(
-        "http://127.0.0.1:8000/api/orders/create-order/",
+        `${BASE_URL}/api/orders/create-order/`,
         {
         method: "POST",
         headers: {
@@ -113,7 +115,7 @@ const createOrder = async () => {
     }
 };
 
-// ✅ OPEN RAZORPAY (NOT DURING RENDER)
+// razorpay
 const openRazorpay = (order) => {
     if (!window.Razorpay) {
     showToast("Razorpay SDK not loaded");
@@ -138,7 +140,6 @@ const openRazorpay = (order) => {
     rzp.open();
 };
 
-// ✅ SINGLE RETURN (CRITICAL FIX)
 return (
     <Layout>
     {!cart || cart.length === 0 ? (
@@ -156,7 +157,6 @@ return (
         <h2 className="text-3xl font-bold mb-6">Checkout</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* LEFT */}
             <div className="md:col-span-2 space-y-6">
             <div className="bg-white p-5 rounded-xl shadow-lg">
                 <h3 className="text-xl font-semibold mb-4">
@@ -195,7 +195,7 @@ return (
 
                 {cart.map((item, i) => (
                 <div
-                    key={`${item.id}-${i}`}
+                    key={`${item._cartKey}-${i}`}
                     className="flex justify-between border-b py-2"
                 >
                     <span>
@@ -207,7 +207,6 @@ return (
             </div>
             </div>
 
-            {/* RIGHT */}
             <div className="bg-white p-5 rounded-xl shadow-lg h-fit">
             <h3 className="text-xl font-bold mb-4">Order Summary</h3>
 

@@ -85,7 +85,7 @@ export const fetchProductList = (keyword="", pageNumber = "") => async (dispatch
     try {
         dispatch(productListRequest());
         // const productList = await productAPI.getProductList(keyword, pageNumber);
-        const res = await fetch(`http://127.0.0.1:8000/api/products/?search=${keyword}&page=${pageNumber}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/?search=${keyword}&page=${pageNumber}`);
         const data = await res.json();
         dispatch(productListSuccess(data));
     } catch (error) {

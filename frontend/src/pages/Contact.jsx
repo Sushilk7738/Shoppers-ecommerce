@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useToast } from "../context/ToastContext";
 
+const BASE_URL = import.meta.env.VITE_API_URL; // api
+
 const Contact = () => {
 const { showToast } = useToast();
 
@@ -23,13 +25,16 @@ const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-    const response = await fetch("http://127.0.0.1:8000/api/contact/", {
+    const response = await fetch(
+        `${BASE_URL}/api/contact/`,
+        {
         method: "POST",
         headers: {
-        "Content-Type": "application/json",
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-    });
+        }
+    );
 
     if (response.ok) {
         showToast("Message sent successfully");
@@ -50,8 +55,6 @@ const handleSubmit = async (e) => {
 return (
     <Layout>
     <main className="w-11/12 max-w-7xl mx-auto pt-6 pb-16">
-
-        {/* HEADER */}
         <section className="mb-10 animate__animated animate__fadeInDown">
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">
             Contact Us
@@ -62,10 +65,7 @@ return (
         </p>
         </section>
 
-        {/* MAIN GRID */}
         <section className="grid gap-14 lg:grid-cols-2 items-start">
-
-        {/* LEFT – IMAGE */}
         <div className="animate__animated animate__fadeInLeft">
             <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-tr from-cyan-100 via-blue-100 to-transparent rounded-3xl blur-2xl opacity-70" />
@@ -109,7 +109,6 @@ return (
             </div>
         </div>
 
-        {/* RIGHT – FORM */}
         <div className="animate__animated animate__fadeInRight">
             <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900">
@@ -182,7 +181,6 @@ return (
             </form>
             </div>
         </div>
-
         </section>
     </main>
     </Layout>

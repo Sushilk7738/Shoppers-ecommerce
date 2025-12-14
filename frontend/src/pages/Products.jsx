@@ -5,56 +5,68 @@ import ProductCarousel from "../components/ProductCarousel";
 import { fetchProductList } from "../redux/slices/productSlice";
 
 const Products = () => {
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-  const { products, loading, error } = useSelector(
-    (state) => state.product.productList
-  );
+    // state
+    const productState =
+        useSelector((state) => state.product.productList) || {};
 
-  useEffect(() => {
-    dispatch(fetchProductList());
-  }, [dispatch]);
+    const {
+        products = [],
+        loading = false,
+        error = null,
+    } = productState;
 
-  if (loading) {
-    return (
-      <Layout>
-        <p className="p-10 text-center">Loading products...</p>
-      </Layout>
-    );
-  }
+    // fetch
+    useEffect(() => {
+        dispatch(fetchProductList());
+    }, [dispatch]);
 
-  if (error) {
-    return (
-      <Layout>
-        <p className="p-10 text-center text-red-500">{error}</p>
-      </Layout>
-    );
-  }
-
-  // ✅ group by category (backend category)
-  const groupedProducts = products.reduce((acc, product) => {
-    if (!acc[product.category]) {
-      acc[product.category] = [];
+    // loading
+    if (loading) {
+        return (
+            <Layout>
+                <p className="p-10 text-center">Loading products...</p>
+            </Layout>
+        );
     }
-    acc[product.category].push(product);
-    return acc;
-  }, {});
 
-  return (
-    <Layout>
-      <div className="p-4 space-y-12">
-        {Object.entries(groupedProducts).map(
-          ([category, items]) => (
-            <ProductCarousel
-              key={category}
-              category={category}
-              products={items}
-            />
-          )
-        )}
-      </div>
-    </Layout>
-  );
+    // error
+    if (error) {
+        return (
+            <Layout>
+                <p className="p-10 text-center text-red-500">
+                    {typeof error === "string"
+                        ? error
+                        : error?.detail || "Failed to load products"}
+                </p>
+            </Layout>
+        );
+    }
+
+    // group by category
+    const groupedProducts = products.reduce((acc, product) => {
+        const category = product?.category || "Others"; // guard
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(product);
+        return acc;
+    }, {});
+
+    return (
+        <Layout>
+            <div className="p-4 space-y-12">
+                {Object.entries(groupedProducts).map(
+                    ([category, items]) => (
+                        <ProductCarousel
+                            key={category}
+                            category={category}
+                            products={items}
+                        />
+                    )
+                )}
+            </div>
+        </Layout>
+    );
 };
 
 export default Products;

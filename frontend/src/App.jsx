@@ -9,11 +9,13 @@ import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import OrderDetails from "./pages/OrderDetails";
+import NotFound from "./pages/NotFound.jsx";
 
 
 export default function App() {
   return (
     <Routes>
+      <Route path="*" element={<NotFound/>} />
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products/>} />
       <Route path="/cart" element={<Cart />} />
