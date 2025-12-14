@@ -42,9 +42,8 @@ const handleSubmit = async (e) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            username: email.trim().toLowerCase(), // django
-            email: email.trim().toLowerCase(),
             name: fullname,
+            email: email.trim().toLowerCase(),
             password: password,
         }),
         }
