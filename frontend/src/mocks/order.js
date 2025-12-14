@@ -1,6 +1,6 @@
 // src/mocks/order.js
 import axios from "axios";
-import { getAuthToken } from "../utils/auth";
+import { getAuthToken } from "../utils/Auth";
 
 const API = axios.create({
     baseURL: "http://127.0.0.1:8000/api/orders",
