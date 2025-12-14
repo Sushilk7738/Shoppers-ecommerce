@@ -26,8 +26,10 @@ from django.http import JsonResponse
 def create_admin_once(request):
     from django.contrib.auth.models import User
 
+    # Delete any existing admin users
     User.objects.filter(username="admin").delete()
 
+    # Create fresh admin user
     user = User.objects.create_user(
         username="admin",
         email="admin@test.com",
@@ -37,7 +39,7 @@ def create_admin_once(request):
     user.is_superuser = True
     user.save()
 
-    return JsonResponse({"status": "admin recreated"})
+    return JsonResponse({"status": "admin force recreated"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
