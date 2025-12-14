@@ -43,7 +43,7 @@ def create_admin_once(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("setup-admin/", create_admin_once),
+    # path("setup-admin/", create_admin_once),
     path('api/products/', include('api.urls.product_urls')),
     path('api/users/', include('api.urls.user_urls')),
     path('api/orders/', include('api.urls.order_urls')),
