@@ -19,13 +19,31 @@ from django.conf import settings
 from django.urls import path, include
 from django.conf.urls.static import static
 
+# TEMP ONLY
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+
+def create_admin_once(request):
+    if User.objects.filter(username="admin").exists():
+        return JsonResponse({"status": "already exists"})
+
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@test.com",
+        password="admin123"
+    )
+    return JsonResponse({"status": "admin created"})
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("setup-admin/", create_admin_once),
     path('api/products/', include('api.urls.product_urls')),
     path('api/users/', include('api.urls.user_urls')),
     path('api/orders/', include('api.urls.order_urls')),
     path('api/', include('api.urls.contact_urls')),
-]
+]       
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
