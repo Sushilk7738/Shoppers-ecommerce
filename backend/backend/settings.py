@@ -148,3 +148,14 @@ cloudinary.config(
     api_key=os.environ.get("CLOUDINARY_API_KEY"),
     api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
 )
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://shoppers-ecommerce-backend.onrender.com",
+    "https://shoppers-ecommerce-frontend.onrender.com",
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
