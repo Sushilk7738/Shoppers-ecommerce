@@ -66,7 +66,10 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def get_image(self, obj):
-        return obj.image
+        if not obj.image:
+            return None
+        return str(obj.image)
+
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()
