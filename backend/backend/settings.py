@@ -150,12 +150,11 @@ cloudinary.config(
 )
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://shoppers-ecommerce-backend.onrender.com",
-    "https://shoppers-ecommerce-frontend.onrender.com",
-]
-
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://shoppers-ecommerce-backend.onrender.com",
+]
