@@ -50,7 +50,9 @@ const orderSlice = createSlice({
             })
             .addCase(fetchMyOrders.fulfilled, (state, action) => {
                 state.loading = false;
-                state.orders = action.payload;
+                state.orders = Array.isArray(action.payload)
+                    ? action.payload.map(normalizeOrder)
+                    : [];
             })
             .addCase(fetchMyOrders.rejected, (state, action) => {
                 state.loading = false;
@@ -64,7 +66,7 @@ const orderSlice = createSlice({
             })
             .addCase(fetchOrderDetails.fulfilled, (state, action) => {
                 state.loading = false;
-                state.single = action.payload;
+                state.single = normalizeOrder(action.payload);
             })
             .addCase(fetchOrderDetails.rejected, (state, action) => {
                 state.loading = false;
