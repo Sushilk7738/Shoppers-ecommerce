@@ -54,10 +54,10 @@ def create_order(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_payment(request):
-    """
-    Razorpay signature verify + order save
-    Business logic unchanged
-    """
+    print("VERIFY PAYMENT HIT")
+    print("AMOUNT RECEIVED:", amount)
+    print("CART ITEMS:", cart_items)
+
     try:
         data = request.data
 
