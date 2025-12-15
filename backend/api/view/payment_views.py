@@ -21,6 +21,8 @@ client = razorpay.Client(auth=(
 ))
 
 
+
+
 #  Create Razorpay Order
 
 @api_view(["POST"])
@@ -68,6 +70,7 @@ def verify_payment(request):
         if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
             return Response({"detail": "Invalid payment data"}, status=400)
 
+        # verify razorpay signature
         try:
             client.utility.verify_payment_signature({
                 "razorpay_order_id": razorpay_order_id,
@@ -77,17 +80,21 @@ def verify_payment(request):
         except razorpay.errors.SignatureVerificationError:
             return Response({"detail": "Payment verification failed"}, status=400)
 
-        amount = data.get("amount")
         address_data = data.get("address")
         cart_items = data.get("cartItems", [])
 
-        if not amount or not cart_items:
+        if not cart_items:
             return Response({"detail": "Invalid order data"}, status=400)
+
+        calculated_total = sum(
+            float(item.get("price", 0)) * int(item.get("qty", 0))
+            for item in cart_items
+        )
 
         order = create_order_from_cart(
             user=request.user,
             payment_method="Razorpay",
-            total_price=amount,
+            total_price=calculated_total,  
             cart_items=cart_items,
             shipping_address=address_data,
             mark_paid=True,
