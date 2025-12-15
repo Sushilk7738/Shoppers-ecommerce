@@ -22,7 +22,7 @@ const token =
     tokenFromStore ||
     (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
-// 🔐 checkout guard
+// checkout guard
 useEffect(() => {
     if (!token) {
     showToast("Please login to continue checkout");
@@ -41,7 +41,8 @@ const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
 const cartTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
+    (sum, item) =>
+        sum + (item.offer_price ?? item.price ?? 0) * item.qty,
     0
 );
 
