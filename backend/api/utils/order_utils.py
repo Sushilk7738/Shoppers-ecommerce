@@ -5,18 +5,24 @@ def create_order_from_cart(
     *,
     user,
     payment_method,
-    total_price,
+    total_price,          # kept for compatibility
     cart_items,
     shipping_address=None,
     mark_paid=False
 ):
 
-    # Shared internal helper to create Order, OrderItems and ShippingAddress.
-    
+    # ✅ FINAL SOURCE OF TRUTH — calculate total from cart
+    calculated_total = 0
+
+    for item in cart_items:
+        qty = int(item.get("qty", 0))
+        price = float(item.get("price", 0))
+        calculated_total += qty * price
+
     order = Order.objects.create(
         user=user,
         paymentMethod=payment_method,
-        totalPrice=float(total_price),
+        totalPrice=calculated_total,   # ✅ FIX
         isPaid=mark_paid,
         paidAt=timezone.now() if mark_paid else None,
     )
@@ -25,11 +31,11 @@ def create_order_from_cart(
         raw_id = item.get("_id") or item.get("id")
         product = None
 
-        if raw_id is not None:
+        if raw_id:
             try:
                 product = Product.objects.get(_id=int(raw_id))
             except Product.DoesNotExist:
-                product = None
+                pass
 
         OrderItem.objects.create(
             product=product,
