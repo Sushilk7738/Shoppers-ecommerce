@@ -3,7 +3,7 @@ import axios from "axios";
 import { getAuthToken } from "../utils/Auth";
 
 const API = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/orders",
+    baseURL: `${import.meta.env.VITE_API_URL}/api/orders`,
     headers: { "Content-Type": "application/json" },
 });
 
