@@ -104,7 +104,8 @@ class OrderSerializer(serializers.ModelSerializer):
     orderItems = serializers.SerializerMethodField(read_only=True)
     ShippingAddress = serializers.SerializerMethodField(read_only=True)
     User = serializers.SerializerMethodField(read_only=True)
-
+    totalPrice = serializers.FloatField(read_only=True)
+    
     class Meta:
         model = Order
         fields = "__all__"
