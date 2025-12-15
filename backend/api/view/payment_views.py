@@ -50,9 +50,9 @@ def create_order(request):
 
 
 # Verify Payment 
-@csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@csrf_exempt
 def verify_payment(request):
     print("VERIFY PAYMENT HIT")
     print("AMOUNT RECEIVED:", amount)
@@ -120,6 +120,9 @@ def verify_payment(request):
     except Exception as e:
         print("VERIFY PAYMENT ERROR:", str(e))
         return Response(
-            {"detail": "Payment verification failed"},
-            status=400
+            {"detail": "Payment verification failed",
+            "error": str(e)
+            },
+            status=500
         )
+    
