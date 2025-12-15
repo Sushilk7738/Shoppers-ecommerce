@@ -2,12 +2,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 import razorpay
 
 from api.utils.order_utils import create_order_from_cart
 from api.view.invoice_views import generate_invoice_pdf_bytes
 from api.utils.email_utils import send_order_success_email
+
 
 
 # Razorpay client
@@ -48,6 +50,7 @@ def create_order(request):
 
 
 # Verify Payment 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_payment(request):
@@ -115,4 +118,8 @@ def verify_payment(request):
         }, status=200)
 
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        print("VERIFY PAYMENT ERROR:", str(e))
+        return Response(
+            {"detail": "Payment verification failed"},
+            status=400
+        )
