@@ -9,6 +9,8 @@ import razorpay
 from api.utils.order_utils import create_order_from_cart
 from api.view.invoice_views import generate_invoice_pdf_bytes
 from api.utils.email_utils import send_order_success_email
+from api.serializers import OrderSerializer
+
 
 
 
@@ -55,13 +57,10 @@ def create_order(request):
 @csrf_exempt
 def verify_payment(request):
     print("VERIFY PAYMENT HIT")
-    print("AMOUNT RECEIVED:", amount)
-    print("CART ITEMS:", cart_items)
 
     try:
         data = request.data
 
-        # Razorpay response fields
         razorpay_order_id = data.get("razorpay_order_id")
         razorpay_payment_id = data.get("razorpay_payment_id")
         razorpay_signature = data.get("razorpay_signature")
@@ -69,7 +68,6 @@ def verify_payment(request):
         if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
             return Response({"detail": "Invalid payment data"}, status=400)
 
-        #Verify signature
         try:
             client.utility.verify_payment_signature({
                 "razorpay_order_id": razorpay_order_id,
@@ -77,12 +75,8 @@ def verify_payment(request):
                 "razorpay_signature": razorpay_signature,
             })
         except razorpay.errors.SignatureVerificationError:
-            return Response(
-                {"detail": "Payment verification failed"},
-                status=400
-            )
+            return Response({"detail": "Payment verification failed"}, status=400)
 
-        # Order data
         amount = data.get("amount")
         address_data = data.get("address")
         cart_items = data.get("cartItems", [])
@@ -90,7 +84,6 @@ def verify_payment(request):
         if not amount or not cart_items:
             return Response({"detail": "Invalid order data"}, status=400)
 
-        # Create order
         order = create_order_from_cart(
             user=request.user,
             payment_method="Razorpay",
@@ -100,29 +93,12 @@ def verify_payment(request):
             mark_paid=True,
         )
 
-        # email + invoice
-        # try:
-        #     pdf_bytes = generate_invoice_pdf_bytes(order, request.user)
-        #     if pdf_bytes and request.user.email:
-        #         send_order_success_email(
-        #             user_email=request.user.email,
-        #             order_id=order._id,
-        #             pdf_content=pdf_bytes
-        #         )
-        # except Exception:
-        #     pass
-
-        return Response({
-            "msg": "payment verified & order saved",
-            "order_id": order._id
-        }, status=200)
+        serializer = OrderSerializer(order, context={"request": request})
+        return Response(serializer.data, status=200)
 
     except Exception as e:
         print("VERIFY PAYMENT ERROR:", str(e))
         return Response(
-            {"detail": "Payment verification failed",
-            "error": str(e)
-            },
+            {"detail": "Payment verification failed", "error": str(e)},
             status=500
         )
-    
