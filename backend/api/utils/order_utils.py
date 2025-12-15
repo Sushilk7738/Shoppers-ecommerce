@@ -16,7 +16,7 @@ def create_order_from_cart(
     order = Order.objects.create(
         user=user,
         paymentMethod=payment_method,
-        totalPrice=total_price,
+        totalPrice=float(total_price),
         isPaid=mark_paid,
         paidAt=timezone.now() if mark_paid else None,
     )
