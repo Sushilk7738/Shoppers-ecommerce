@@ -58,12 +58,16 @@ def create_order(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def verify_payment(request):
-    print("====== VERIFY PAYMENT HIT ======")
-    print("RAW BODY:", request.body)
-    print("PARSED DATA:", request.data)
-    
+    print("VERIFY PAYMENT HIT")
+
     try:
         data = request.data
+
+        amount = data.get("amount")
+        cart_items = data.get("cartItems", [])
+
+        print("AMOUNT RECEIVED:", amount)
+        print("CART ITEMS:", cart_items)
 
         razorpay_order_id = data.get("razorpay_order_id")
         razorpay_payment_id = data.get("razorpay_payment_id")
@@ -72,7 +76,6 @@ def verify_payment(request):
         if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
             return Response({"detail": "Invalid payment data"}, status=400)
 
-        # verify razorpay signature
         try:
             client.utility.verify_payment_signature({
                 "razorpay_order_id": razorpay_order_id,
@@ -83,20 +86,11 @@ def verify_payment(request):
             return Response({"detail": "Payment verification failed"}, status=400)
 
         address_data = data.get("address")
-        cart_items = data.get("cartItems", [])
-
-        if not cart_items:
-            return Response({"detail": "Invalid order data"}, status=400)
-
-        calculated_total = sum(
-            float(item.get("price", 0)) * int(item.get("qty", 0))
-            for item in cart_items
-        )
 
         order = create_order_from_cart(
             user=request.user,
             payment_method="Razorpay",
-            total_price=calculated_total,  
+            total_price=amount,
             cart_items=cart_items,
             shipping_address=address_data,
             mark_paid=True,
