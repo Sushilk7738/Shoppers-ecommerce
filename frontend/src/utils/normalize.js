@@ -2,7 +2,6 @@
 
 export const normalizeProduct = (product = {}) => {
     return {
-        // 🔑 IMPORTANT: BOTH id AND _id ठेवतो
         _id: product._id ?? product.id ?? null,
         id: product._id ?? product.id ?? null,
 
@@ -12,7 +11,6 @@ export const normalizeProduct = (product = {}) => {
         category: product.category ?? "Others",
         description: product.description ?? "",
 
-        // 💰 PRICE NEVER LOST
         price: Number(product.price ?? 0),
         discount: Number(product.discount ?? 0),
         offer_price:
@@ -31,11 +29,11 @@ export const normalizeOrder = (order = {}) => {
 
     return {
         id: order._id ?? order.id ?? null,
+
         isPaid: Boolean(order.isPaid ?? false),
         isDelivered: Boolean(order.isDelivered ?? false),
 
-        // 💰 THIS FIXES TOTAL = 0
-        total: Number(
+        totalPrice: Number(
             order.totalPrice ??
             order.total_price ??
             order.amount ??
