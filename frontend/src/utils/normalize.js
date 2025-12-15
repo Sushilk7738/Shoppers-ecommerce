@@ -1,19 +1,25 @@
 // src/utils/normalize.js
 
 export const normalizeProduct = (product = {}) => {
+    const _id = product._id ?? product.id ?? null;
+
     return {
-        id: product._id ?? product.id ?? null,
+        _id,                 
+        id: _id,            
         name: product.name ?? "",
         image: product.image ?? null,
         brand: product.brand ?? "",
         category: product.category ?? "Others",
         description: product.description ?? "",
-        price: product.price ?? 0,
-        discount: product.discount ?? 0,
-        offer_price: product.offer_price ?? null,
-        rating: product.rating ?? 0,
-        countInStock: product.countInStock ?? 0,
-        numReviews: product.numReviews ?? 0,
+        price: Number(product.price ?? 0),
+        discount: Number(product.discount ?? 0),
+        offer_price:
+            product.offer_price !== undefined
+                ? Number(product.offer_price)
+                : null,
+        rating: Number(product.rating ?? 0),
+        countInStock: Number(product.countInStock ?? 0),
+        numReviews: Number(product.numReviews ?? 0),
     };
 };
 
@@ -23,12 +29,16 @@ export const normalizeOrder = (order = {}) => {
     return {
         id: order._id ?? order.id ?? null,
         isPaid: Boolean(order.isPaid ?? order.is_paid ?? false),
-        isDelivered: Boolean(order.isDelivered ?? order.is_delivered ?? false),
+        isDelivered: Boolean(
+            order.isDelivered ?? order.is_delivered ?? false
+        ),
         total:
-            order.totalPrice ??
-            order.total_price ??
-            order.amount ??
-            0,
+            Number(
+                order.totalPrice ??
+                order.total_price ??
+                order.amount ??
+                0
+            ),
         createdAt:
             order.createdAt ??
             order.created_at ??
