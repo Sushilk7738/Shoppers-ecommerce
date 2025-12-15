@@ -108,7 +108,23 @@ class OrderSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = [
+            "_id",
+            "user",
+            "paymentMethod",
+            "taxPrice",
+            "shippingPrice",
+            "totalPrice",   
+            "isPaid",
+            "paidAt",
+            "isDelivered",
+            "deliveredAt",
+            "createdAt",
+            "orderItems",
+            "ShippingAddress",
+            "User",
+        ]
+
 
     def get_orderItems(self, obj):
         items = obj.orderitem_set.all()
