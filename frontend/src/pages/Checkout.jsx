@@ -79,7 +79,7 @@ const verifyPayment = async (response) => {
     if (res.ok) {
         showToast("Order Completed Successfully!");
         dispatch(clearCart());
-        navigate(`/order/${data.order_id}`);
+        navigate(`/order/${data._id}`);
     } else {
         showToast(data.detail || "Verification failed");
     }
