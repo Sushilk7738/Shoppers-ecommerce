@@ -50,7 +50,6 @@ return [
 
 const extractETA = (order) => {
 if (order.eta) return order.eta;
-
 if (order.isDelivered) return "Delivered";
 if (order.isPaid) return "Arriving in 2–5 days";
 return "Delivery after payment";
@@ -62,24 +61,31 @@ const navigate = useNavigate();
 const dispatch = useDispatch();
 
 const { single, loading, error } = useSelector(s => s.order || {});
-const order = useMemo(() => normalizeOrder(single), [single]);
+
+const order = useMemo(
+    () => (single ? normalizeOrder(single) : null),
+    [single]
+);
 
 useEffect(() => {
     if (id) dispatch(fetchOrderDetails(id));
 }, [dispatch, id]);
 
 const timeline = useMemo(
-    () => buildTimelineFromOrder(order),
+    () => (order ? buildTimelineFromOrder(order) : []),
     [order]
 );
 
 const eta = useMemo(
-    () => extractETA(order),
+    () => (order ? extractETA(order) : "-"),
     [order]
 );
 
 const active = timeline.filter(t => t.active).length - 1;
-const percent = Math.max(0, active / (timeline.length - 1)) * 100;
+const percent =
+    timeline.length > 1
+    ? Math.max(0, active / (timeline.length - 1)) * 100
+    : 0;
 
 const handleInvoiceDownload = async () => {
     try {
@@ -111,13 +117,13 @@ return (
         </div>
         )}
 
-        {!loading && !error && !order.id && (
+        {!loading && !error && !order && (
         <div className="p-10 text-center text-gray-700">
-            Order not found
+            Loading order details...
         </div>
         )}
 
-        {!loading && !error && order.id && (
+        {!loading && !error && order && order.id && (
         <>
             <header className="rounded-2xl p-6 bg-gradient-to-r from-cyan-50 to-white shadow-lg border flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -149,7 +155,6 @@ return (
             </div>
             </header>
 
-            {/* UI remains SAME below (items, timeline, address, etc.) */}
 
             <div className="mt-6 flex gap-3">
             <button
