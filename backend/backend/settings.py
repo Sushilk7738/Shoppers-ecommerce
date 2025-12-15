@@ -55,7 +55,9 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "https://shoppers-ecommerce-frontend.onrender.com",
+    "https://shoppers-ecommerce-backend.onrender.com",
 ]
+
 
 CORS_ALLOW_HEADERS = [
     "authorization",
@@ -191,9 +193,6 @@ CSRF_COOKIE_SECURE = False
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://shoppers-ecommerce-backend.onrender.com",
-]
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Layout from "../components/Layout";
 import "animate.css";
@@ -6,7 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "../redux/slices/cartSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL; // api
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Checkout = () => {
 const { showToast } = useToast();
@@ -21,6 +21,14 @@ const tokenFromStore = useSelector((state) => state.user.token);
 const token =
     tokenFromStore ||
     (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+
+// 🔐 checkout guard
+useEffect(() => {
+    if (!token) {
+    showToast("Please login to continue checkout");
+    navigate("/login?redirect=/checkout");
+    }
+}, [token, navigate, showToast]);
 
 // form
 const [form, setForm] = useState({
@@ -37,7 +45,7 @@ const cartTotal = cart.reduce(
     0
 );
 
-// verify
+// verify payment
 const verifyPayment = async (response) => {
     const paymentData = {
     razorpay_payment_id: response.razorpay_payment_id,
@@ -55,7 +63,7 @@ const verifyPayment = async (response) => {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
+            Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(paymentData),
         }
@@ -66,23 +74,18 @@ const verifyPayment = async (response) => {
     if (res.ok) {
         showToast("Order Completed Successfully!");
         dispatch(clearCart());
-        navigate("/my-orders");
+        navigate(`/order/${data.order_id}`);
     } else {
         showToast(data.detail || "Verification failed");
     }
     } catch (error) {
-    console.log(error);
+    console.error(error);
     showToast("Payment verification failed");
     }
 };
 
-// create order
+// create razorpay order
 const createOrder = async () => {
-    if (!token) {
-    showToast("Please login before checkout");
-    return;
-    }
-
     if (!form.fullName || !form.mobile || !form.address) {
     showToast("Please fill all fields");
     return;
@@ -110,7 +113,7 @@ const createOrder = async () => {
 
     openRazorpay(order);
     } catch (err) {
-    console.log(err);
+    console.error(err);
     showToast("Something went wrong!");
     }
 };
