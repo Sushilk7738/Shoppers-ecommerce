@@ -40,11 +40,15 @@ const [form, setForm] = useState({
 const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-const cartTotal = cart.reduce(
-    (sum, item) =>
-        sum + (item.offer_price ?? item.price ?? 0) * item.qty,
-    0
-);
+const cartTotal = cart.reduce((sum, item) => {
+    const unitPrice =
+        item.offer_price ??
+        item.price ??
+        0;
+
+    return sum + Number(unitPrice) * Number(item.qty || 0);
+}, 0);
+
 
 // verify payment
 const verifyPayment = async (response) => {
