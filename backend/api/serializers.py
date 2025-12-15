@@ -118,7 +118,6 @@ class OrderSerializer(serializers.ModelSerializer):
             "isPaid",
             "paidAt",
             "isDelivered",
-            "deliveredAt",
             "createdAt",
             "orderItems",
             "ShippingAddress",
