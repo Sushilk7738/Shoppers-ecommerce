@@ -101,16 +101,16 @@ def verify_payment(request):
         )
 
         # email + invoice
-        try:
-            pdf_bytes = generate_invoice_pdf_bytes(order, request.user)
-            if pdf_bytes and request.user.email:
-                send_order_success_email(
-                    user_email=request.user.email,
-                    order_id=order._id,
-                    pdf_content=pdf_bytes
-                )
-        except Exception:
-            pass
+        # try:
+        #     pdf_bytes = generate_invoice_pdf_bytes(order, request.user)
+        #     if pdf_bytes and request.user.email:
+        #         send_order_success_email(
+        #             user_email=request.user.email,
+        #             order_id=order._id,
+        #             pdf_content=pdf_bytes
+        #         )
+        # except Exception:
+        #     pass
 
         return Response({
             "msg": "payment verified & order saved",
