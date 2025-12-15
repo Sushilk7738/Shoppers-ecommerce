@@ -19,7 +19,6 @@ const cartSlice = createSlice({
     },
 
     reducers: {
-        // ✅ ADD ITEM (with unique key)
         addToCart: (state, action) => {
             if (!action.payload || !action.payload._id) {
                 console.error("INVALID PRODUCT PAYLOAD:", action.payload);
@@ -28,17 +27,22 @@ const cartSlice = createSlice({
 
             const item = {
                 ...action.payload,
-                _id: action.payload._id,                 // ✅ MUST EXIST
+
+                _id: action.payload._id,
                 _cartKey: `${action.payload._id}_${Date.now()}`,
-                qty: action.payload.qty || 1,
+                qty: Number(action.payload.qty) || 1,
+
+                price: Number(
+                    action.payload.price ??
+                    action.payload.offer_price ??
+                    0
+                ),
             };
 
             state.cartItems.push(item);
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 
-
-        // ✅ REMOVE BY _cartKey
         removeFromCart: (state, action) => {
             state.cartItems = state.cartItems.filter(
                 (item) => item._cartKey !== action.payload
@@ -46,7 +50,6 @@ const cartSlice = createSlice({
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 
-        // ✅ UPDATE QUANTITY
         updateQuantity: (state, action) => {
             const { _cartKey, qty } = action.payload;
 
@@ -61,7 +64,6 @@ const cartSlice = createSlice({
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 
-        // ✅ CLEAR CART
         clearCart: (state) => {
             state.cartItems = [];
             localStorage.removeItem("cartItems");
