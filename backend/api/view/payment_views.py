@@ -58,8 +58,10 @@ def create_order(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def verify_payment(request):
-    print("VERIFY PAYMENT HIT")
-
+    print("====== VERIFY PAYMENT HIT ======")
+    print("RAW BODY:", request.body)
+    print("PARSED DATA:", request.data)
+    
     try:
         data = request.data
 
