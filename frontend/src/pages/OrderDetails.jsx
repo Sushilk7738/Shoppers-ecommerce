@@ -149,7 +149,7 @@ return (
                 <div className="text-right">
                 <div className="text-sm text-slate-600">Total</div>
                 <div className="text-cyan-700 font-bold text-lg">
-                    ₹{order.total}
+                    ₹{order.total || order.totalPrice}
                 </div>
                 </div>
             </div>
