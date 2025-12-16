@@ -62,43 +62,35 @@ const Home = () => {
 
                 {/* ===== HOME BANNER ===== */}
                 <header className="mb-14">
-                    <div className="w-full h-[280px] md:h-[420px] overflow-hidden">
-                        <Swiper
-                            slidesPerView={1}
-                            navigation
-                            pagination={{ clickable: true }}
-                            modules={[Navigation, Pagination]}
-                            className="w-full h-full"
-                        >
-                            <SwiperSlide>
-                                <img
-                                    src="/p4.jpg"
-                                    alt="Banner 1"
-                                    loading="eager"
-                                    className="w-full h-full object-cover object-center"
-                                />
-                            </SwiperSlide>
+                    <Swiper
+                        slidesPerView={1}
+                        navigation
+                        pagination
+                        modules={[Navigation, Pagination]}
+                    >
+                        <SwiperSlide>
+                            <img
+                                src="/p4.jpg"
+                                className="w-full h-[420px] object-cover"
+                            />
+                        </SwiperSlide>
 
-                            <SwiperSlide>
-                                <img
-                                    src="/p2.jpg"
-                                    alt="Banner 2"
-                                    loading="eager"
-                                    className="w-full h-full object-cover object-center"
-                                />
-                            </SwiperSlide>
+                        <SwiperSlide>
+                            <img
+                                src="/p2.jpg"
+                                className="w-full h-[420px] object-cover"
+                            />
+                        </SwiperSlide>
 
-                            <SwiperSlide>
-                                <img
-                                    src="/p3.jpg"
-                                    alt="Banner 3"
-                                    loading="eager"
-                                    className="w-full h-full object-cover object-center"
-                                />
-                            </SwiperSlide>
-                        </Swiper>
-                    </div>
+                        <SwiperSlide>
+                            <img
+                                src="/p3.jpg"
+                                className="w-full h-[420px] object-cover"
+                            />
+                        </SwiperSlide>
+                    </Swiper>
                 </header>
+
 
 
 
