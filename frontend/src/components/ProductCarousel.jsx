@@ -122,8 +122,8 @@ const ProductCarousel = ({ category, products = [] }) => {
             {/* ===== MOBILE VIEW → SWIPER ===== */}
             <div className="block md:hidden">
                 <Swiper
-                    slidesPerView={1.2}
-                    spaceBetween={16}
+                    slidesPerView={1}
+                    spaceBetween={12}
                     pagination={{ clickable: true }}
                     modules={[Pagination]}
                 >
