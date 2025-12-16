@@ -31,3 +31,7 @@
 .swiper-slide {
     height: auto;
 }
+
+.swiper-pagination {
+    bottom: 8px !important;
+}
