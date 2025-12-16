@@ -24,7 +24,6 @@ const Home = () => {
         dispatch(fetchProductList());
     }, [dispatch]);
 
-    // SAME logic, memo-safe
     const getFinalPrice = useCallback((product) => {
         if (product?.offer_price) return product.offer_price;
         if (product?.discount) {
@@ -61,42 +60,47 @@ const Home = () => {
         <Layout>
             <div className="bg-white">
 
-                {/* SLIDER */}
+                {/* ===== BANNER / SWIPER ===== */}
                 <header className="mb-14">
-                    <Swiper
-                        slidesPerView={1}
-                        navigation
-                        pagination
-                        modules={[Navigation, Pagination]}
-                    >
-                        <SwiperSlide>
-                            <img
-                                src="/p4.jpg"
-                                alt="Banner 1"
-                                className="w-full h-[420px] object-cover"
-                                loading="lazy"
-                            />
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <img
-                                src="/p2.jpg"
-                                alt="Banner 2"
-                                className="w-full h-[420px] object-cover"
-                                loading="lazy"
-                            />
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <img
-                                src="/p3.jpg"
-                                alt="Banner 3"
-                                className="w-full h-[420px] object-cover"
-                                loading="lazy"
-                            />
-                        </SwiperSlide>
-                    </Swiper>
+                    <div className="w-full h-[220px] md:h-[420px] overflow-hidden">
+                        <Swiper
+                            slidesPerView={1}
+                            navigation
+                            pagination={{ clickable: true }}
+                            modules={[Navigation, Pagination]}
+                            className="w-full h-full"
+                        >
+                            <SwiperSlide>
+                                <img
+                                    src="/p4.jpg"
+                                    alt="Banner 1"
+                                    loading="eager"
+                                    className="w-full h-full object-cover"
+                                />
+                            </SwiperSlide>
+
+                            <SwiperSlide>
+                                <img
+                                    src="/p2.jpg"
+                                    alt="Banner 2"
+                                    loading="eager"
+                                    className="w-full h-full object-cover"
+                                />
+                            </SwiperSlide>
+
+                            <SwiperSlide>
+                                <img
+                                    src="/p3.jpg"
+                                    alt="Banner 3"
+                                    loading="eager"
+                                    className="w-full h-full object-cover"
+                                />
+                            </SwiperSlide>
+                        </Swiper>
+                    </div>
                 </header>
 
-                {/* PRODUCTS */}
+                {/* ===== PRODUCTS ===== */}
                 <section className="px-6 md:px-16 pb-20">
                     <h1 className="text-3xl font-bold text-center mb-2">
                         Latest Products
@@ -105,6 +109,7 @@ const Home = () => {
                         Discover the latest arrivals curated just for you.
                     </p>
 
+                    {/* Loading skeleton */}
                     {loading && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                             {Array.from({ length: 8 }).map((_, idx) => (
@@ -116,6 +121,7 @@ const Home = () => {
                         </div>
                     )}
 
+                    {/* Products */}
                     {!loading && products.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                             {products.slice(0, 4).map((product, index) => (
@@ -127,12 +133,12 @@ const Home = () => {
                                         hover:-translate-y-1 hover:shadow-2xl"
                                     style={{ animationDelay: `${index * 0.08}s` }}
                                 >
-                                    <div className="h-64 overflow-hidden">
+                                    <div className="h-64 bg-gray-100 overflow-hidden">
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
                                             loading="lazy"
+                                            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
                                         />
                                     </div>
 
