@@ -225,12 +225,22 @@ return (
                 </span>
             </p>
 
-            <button
-                onClick={createOrder}
-                className="w-full bg-cyan-600 text-white py-3 rounded-lg hover:bg-cyan-700"
-            >
-                Proceed to Payment
-            </button>
+            {token ? (
+                <button
+                    onClick={createOrder}
+                    className="w-full bg-cyan-600 text-white py-3 rounded-lg hover:bg-cyan-700"
+                >
+                    Proceed to Payment
+                </button>
+            ) : (
+                <button
+                    disabled
+                    className="w-full bg-gray-400 text-white py-3 rounded-lg cursor-not-allowed"
+                >
+                    Login to Continue
+                </button>
+            )}
+
             </div>
         </div>
         </div>
