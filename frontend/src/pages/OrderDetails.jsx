@@ -235,12 +235,15 @@ export default function OrderDetails() {
                                     </div>
                                 </section>
 
-                                {/* Items */}
-                                <section className="bg-white rounded-2xl p-6 border shadow-md">
-                                    <h3 className="text-lg font-semibold mb-4">
-                                        Items in this order
-                                    </h3>
+                                {/* items */}
+                            <section className="bg-white rounded-2xl p-6 border shadow-md">
+                                <h3 className="text-lg font-semibold mb-4">
+                                    Items in this order
+                                </h3>
 
+                                {orderItems.length === 0 ? (
+                                    <p className="text-slate-500">No items found.</p>
+                                ) : (
                                     <div className="space-y-4">
                                         {orderItems.map((orderItem) => (
                                             <div
@@ -254,7 +257,7 @@ export default function OrderDetails() {
                                                 />
 
                                                 <div className="flex-1">
-                                                    <h4 className="font-semibold">
+                                                    <h4 className="font-semibold text-slate-900">
                                                         {orderItem.name}
                                                     </h4>
                                                     <p className="text-sm text-slate-500">
@@ -268,7 +271,9 @@ export default function OrderDetails() {
                                             </div>
                                         ))}
                                     </div>
-                                </section>
+                                )}
+                            </section>
+
                             </div>
 
                             {/* Right */}
