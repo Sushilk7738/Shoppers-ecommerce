@@ -25,3 +25,9 @@
 .animate-fade {
     animation: fadeInOut 2s ease forwards;
 }
+
+
+.swiper,
+.swiper-slide {
+    height: auto;
+}
