@@ -61,31 +61,42 @@ const Home = () => {
             <div className="bg-white">
 
                 {/* ===== HOME BANNER ===== */}
-                <header className="mb-14">
+                <header>
                     <Swiper
-                        slidesPerView={1}
-                        navigation
-                        pagination
+                        pagination={true}
+                        navigation={true}
                         modules={[Navigation, Pagination]}
+                        slidesPerView={1}
                     >
                         <SwiperSlide>
                             <img
                                 src="/p4.jpg"
-                                className="w-full h-[420px] object-cover"
+                                alt="banner-1"
+                                className="w-full h-[220px] md:h-[420px] object-cover"
                             />
                         </SwiperSlide>
 
                         <SwiperSlide>
                             <img
                                 src="/p2.jpg"
-                                className="w-full h-[420px] object-cover"
+                                alt="banner-2"
+                                className="w-full h-[220px] md:h-[420px] object-cover"
                             />
                         </SwiperSlide>
 
                         <SwiperSlide>
                             <img
                                 src="/p3.jpg"
-                                className="w-full h-[420px] object-cover"
+                                alt="banner-3"
+                                className="w-full h-[220px] md:h-[420px] object-cover"
+                            />
+                        </SwiperSlide>
+
+                        <SwiperSlide>
+                            <img
+                                src="/p.jpg"
+                                alt="banner-4"
+                                className="w-full h-[220px] md:h-[420px] object-cover"
                             />
                         </SwiperSlide>
                     </Swiper>
