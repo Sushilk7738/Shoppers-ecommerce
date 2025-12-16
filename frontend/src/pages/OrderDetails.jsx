@@ -105,7 +105,12 @@ export default function OrderDetails() {
         [order]
     );
 
-    const orderItems = order?.orderItems ?? order?.order_items ?? [];
+    const orderItems =
+    order?.orderItems ??
+    order?.order_items ??
+    order?.items ??
+    [];
+
     const shippingAddress =
         order?.shippingAddress ??
         order?.shipping_address ??
