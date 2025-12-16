@@ -86,6 +86,7 @@ return (
             src="/images/signup.jpg"
             className="w-full max-w-xl object-contain"
             alt="Signup"
+            loading="lazy"
         />
         </div>
 

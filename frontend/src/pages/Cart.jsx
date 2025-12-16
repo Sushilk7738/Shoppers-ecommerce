@@ -48,6 +48,7 @@ return (
                                 <img
                                     src={item.image}
                                     alt={item.title}
+                                    loading="lazy"
                                     className="w-20 h-20 rounded-md object-cover"
                                 />
 

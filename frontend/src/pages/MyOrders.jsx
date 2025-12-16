@@ -113,6 +113,7 @@ const MyOrders = () => {
                                                 item.title ??
                                                 "Product"
                                             }
+                                            loading="lazy"
                                             className="w-20 h-20 rounded-lg object-cover shadow border hover:scale-105 transition-transform"
                                         />
                                     ))

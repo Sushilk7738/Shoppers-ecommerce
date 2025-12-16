@@ -74,6 +74,7 @@ return (
                 <img
                 src="/contact1.jpg"
                 alt="Customer support"
+                loading="lazy"
                 className="w-full h-64 md:h-80 object-cover"
                 />
 

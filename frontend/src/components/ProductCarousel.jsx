@@ -72,6 +72,7 @@ const ProductCarousel = ({ category, products = [] }) => {
                             <img
                                 src={product.image}
                                 alt={product.name || "product"}
+                                loading="lazy"
                                 className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                             />
                         </div>

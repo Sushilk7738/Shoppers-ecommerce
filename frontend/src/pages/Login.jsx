@@ -91,6 +91,7 @@ return (
         <div className="flex items-center justify-center p-6">
         <img
             src="/images/signup.jpg"
+            loading="lazy"
             className="w-full max-w-xl object-contain"
             alt="Login"
         />
