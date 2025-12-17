@@ -16,39 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf import settings
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf.urls.static import static
-
-# TEMP ONLY
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-
-def create_admin_once(request):
-    from django.contrib.auth.models import User
-
-    # Delete any existing admin users
-    User.objects.filter(username="admin").delete()
-
-    # Create fresh admin user
-    user = User.objects.create_user(
-        username="admin",
-        email="admin@test.com",
-        password="admin123"
-    )
-    user.is_staff = True
-    user.is_superuser = True
-    user.save()
-
-    return JsonResponse({"status": "admin force recreated"})
+from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # path("setup-admin/", create_admin_once),
-    path('api/products/', include('api.urls.product_urls')),
-    path('api/users/', include('api.urls.user_urls')),
-    path('api/orders/', include('api.urls.order_urls')),
-    path('api/', include('api.urls.contact_urls')),
-]       
+    path("admin/", admin.site.urls),
 
-urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+    # API routes
+    path("api/products/", include("api.urls.product_urls")),
+    path("api/users/", include("api.urls.user_urls")),
+    path("api/orders/", include("api.urls.order_urls")),
+    path("api/", include("api.urls.contact_urls")),
+]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += [
+    re_path(
+        r"^(?!api/|admin/).*$",
+        TemplateView.as_view(template_name="index.html"),
+    ),
+]
