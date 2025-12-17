@@ -13,11 +13,14 @@ const Products = () => {
         error = null,
     } = useSelector((state) => state.product.productList || {});
 
-    // fetch once
+    // Product fetch 
     useEffect(() => {
-        dispatch(fetchProductList());
-    }, [dispatch]);
+        if (!products || products.length === 0) {
+            dispatch(fetchProductList());
+        }
+    }, [dispatch, products.length]);
 
+    
     // group by category (safe + memoized)
     const groupedProducts = useMemo(() => {
         return products.reduce((acc, product) => {

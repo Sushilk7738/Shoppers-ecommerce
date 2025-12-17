@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "animate.css";
@@ -16,6 +16,8 @@ const ProductCarousel = ({ category, products = [] }) => {
     const navigate = useNavigate();
     const { showToast } = useToast();
 
+    const hasAnimated = useRef(false);
+
     const getFinalPrice = useCallback((product) => {
         if (product.offer_price) return product.offer_price;
         if (product.discount) {
@@ -26,6 +28,7 @@ const ProductCarousel = ({ category, products = [] }) => {
         return product.price;
     }, []);
 
+    // add to cart
     const addToCartCommon = useCallback(
         (product) => {
             if (!product?._id) return;
@@ -56,13 +59,20 @@ const ProductCarousel = ({ category, products = [] }) => {
 
     if (!products.length) return null;
 
-    const ProductCard = ({ product, index }) => (
+    if (!hasAnimated.current && products.length > 0) {
+        hasAnimated.current = true;
+    }
+
+    const ProductCard = ({ product }) => (
         <div
-            className="bg-white rounded-xl p-4 shadow-lg
-                       animate__animated animate__fadeInUp
-                       transition-all duration-300
-                       hover:-translate-y-1 hover:shadow-2xl"
-            style={{ animationDelay: `${index * 0.1}s` }}
+            className={`bg-white rounded-xl p-4 shadow-lg
+                ${
+                    !hasAnimated.current
+                        ? "animate__animated animate__fadeInUp"
+                        : ""
+                }
+                transition-all duration-300
+                hover:-translate-y-1 hover:shadow-2xl`}
         >
             <div className="aspect-square bg-gray-100 overflow-hidden rounded-lg">
                 <img
@@ -119,7 +129,6 @@ const ProductCarousel = ({ category, products = [] }) => {
                 {category}
             </h2>
 
-            {/* ===== MOBILE VIEW → SWIPER ===== */}
             <div className="block md:hidden">
                 <Swiper
                     slidesPerView={1}
@@ -127,22 +136,17 @@ const ProductCarousel = ({ category, products = [] }) => {
                     pagination={{ clickable: true }}
                     modules={[Pagination]}
                 >
-                    {products.map((product, index) => (
-                        <SwiperSlide key={product._id || index}>
-                            <ProductCard product={product} index={index} />
+                    {products.map((product) => (
+                        <SwiperSlide key={product._id}>
+                            <ProductCard product={product} />
                         </SwiperSlide>
                     ))}
                 </Swiper>
             </div>
 
-            {/* ===== DESKTOP / TABLET → GRID ===== */}
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map((product, index) => (
-                    <ProductCard
-                        key={product._id || index}
-                        product={product}
-                        index={index}
-                    />
+                {products.map((product) => (
+                    <ProductCard key={product._id} product={product} />
                 ))}
             </div>
         </section>
