@@ -18,12 +18,8 @@ const Checkout = () => {
     const cart = useSelector((state) => state.cart.cartItems) || [];
     const tokenFromStore = useSelector((state) => state.user.token);
 
-    const token =
-        tokenFromStore ||
-        (typeof window !== "undefined"
-            ? localStorage.getItem("token")
-            : null);
-
+    const token = tokenFromStore
+    
     const [form, setForm] = useState({
         fullName: "",
         mobile: "",
