@@ -37,9 +37,9 @@ const productSlice = createSlice({
         },
         productListSuccess(state, action) {
             state.productList.loading = false;
-            state.productList.products = action.payload.products;
-            state.productList.page = action.payload.page;
-            state.productList.pages = action.payload.pages;
+            state.productList.products = action.payload.products || [];
+            state.productList.page = action.payload.page ?? 0;
+            state.productList.pages = action.payload.pages ?? 0;
         },
         productListFailure(state, action) {
             state.productList.loading = false;
@@ -79,7 +79,7 @@ const productSlice = createSlice({
         },
         productTopSuccess(state, action) {
             state.topRatedProducts.loading = false;
-            state.topRatedProducts.products = action.payload;
+            state.topRatedProducts.products = action.payload || [];
         },
         productTopFailure(state, action) {
             state.topRatedProducts.loading = false;
@@ -103,8 +103,6 @@ export const {
     productTopFailure,
 } = productSlice.actions;
 
-// thunks
-
 export const fetchProductList =
     (keyword = "", pageNumber = "") =>
     async (dispatch) => {
@@ -114,22 +112,32 @@ export const fetchProductList =
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/products/?search=${keyword}&page=${pageNumber}`
             );
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch products");
+            }
+
             const data = await res.json();
 
-            const normalizedProducts = Array.isArray(data.products)
-                ? data.products.map(normalizeProduct)
+            const rawProducts = Array.isArray(data)
+                ? data
+                : Array.isArray(data.products)
+                ? data.products
                 : [];
+
+            const normalizedProducts = rawProducts.map(normalizeProduct);
 
             dispatch(
                 productListSuccess({
-                    ...data,
                     products: normalizedProducts,
+                    page: data.page ?? 0,
+                    pages: data.pages ?? 0,
                 })
             );
         } catch (error) {
             dispatch(
                 productListFailure(
-                    error?.response?.data?.detail || error.message
+                    error?.message || "Failed to load products"
                 )
             );
         }
@@ -138,14 +146,12 @@ export const fetchProductList =
 export const fetchProductDetails = (id) => async (dispatch) => {
     try {
         dispatch(productDetailsRequest());
-
         const productDetails = await productAPI.getProductDetails(id);
-
         dispatch(productDetailsSuccess(normalizeProduct(productDetails)));
     } catch (error) {
         dispatch(
             productDetailsFailure(
-                error?.response?.data?.detail || error.message
+                error?.message || "Failed to load product"
             )
         );
     }
@@ -155,14 +161,12 @@ export const createReview =
     (productId, review) => async (dispatch) => {
         try {
             dispatch(createReviewRequest());
-
             await productAPI.createProductReview(productId, review);
-
             dispatch(createReviewSuccess());
         } catch (error) {
             dispatch(
                 createReviewFailure(
-                    error?.response?.data?.detail || error.message
+                    error?.message || "Failed to create review"
                 )
             );
         }
@@ -171,19 +175,16 @@ export const createReview =
 export const fetchTopRatedProducts = () => async (dispatch) => {
     try {
         dispatch(productTopRequest());
-
         const topRatedProducts =
             await productAPI.getTopRatedProducts();
-
         const normalizedTopProducts = Array.isArray(topRatedProducts)
             ? topRatedProducts.map(normalizeProduct)
             : [];
-
         dispatch(productTopSuccess(normalizedTopProducts));
     } catch (error) {
         dispatch(
             productTopFailure(
-                error?.response?.data?.detail || error.message
+                error?.message || "Failed to load top products"
             )
         );
     }
