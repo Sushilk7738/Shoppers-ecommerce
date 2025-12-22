@@ -1,17 +1,36 @@
 import { apiFetch } from "./client";
+import { getAuthToken } from "../utils/Auth";
 
 export const orderAPI = {
-    createOrder : (amount, token) =>
+    createOrder: (amount) =>
         apiFetch("/api/orders/create-order/", {
             method: "POST",
-            headers: {Authorization: `Bearer ${token}` },
-            body: JSON.stringify({amount}),
+            body: JSON.stringify({ amount }),
         }),
 
-        verifyPayment : (payload, token) =>
-            apiFetch("/api/orders/verify-payment/", {
-                method: "POST",
-                headers: {Authorization: `Bearer ${token}` },
-                body: JSON.stringify(payload),
-            }),
+    verifyPayment: (payload) =>
+        apiFetch("/api/orders/verify-payment/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }),
+
+    listMyOrders: () => {
+        const token = getAuthToken();
+        return apiFetch("/api/orders/myorders/", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    },
+
+    getOrderDetails: (id) => {
+        const token = getAuthToken();
+        return apiFetch(`/api/orders/${id}/`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    },
 };

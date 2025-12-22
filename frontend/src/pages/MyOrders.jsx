@@ -50,7 +50,7 @@ const MyOrders = () => {
                         </p>
                         <Link
                             to="/products"
-                            className="mt-4 inline-block bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-cyan-700 transition-all animate__animated animate__pulse animate__infinite"
+                            className="mt-4 inline-block bg-cyan-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-cyan-700 transition-all"
                         >
                             Start Shopping
                         </Link>
@@ -59,87 +59,88 @@ const MyOrders = () => {
 
                 {/* Orders */}
                 <div className="space-y-8">
-                    {orders.map((order, index) => (
-                        <div
-                            key={order.id}
-                            className="bg-white rounded-2xl shadow-lg border p-6 hover:shadow-2xl transition-all transform hover:scale-[1.01] animate__animated animate__fadeInUp"
-                            style={{ animationDelay: `${index * 0.08}s` }}
-                        >
-                            {/* Header */}
-                            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900">
-                                        Order #{order.id}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        Placed:{" "}
-                                        {order.createdAt
-                                            ? order.createdAt.substring(0, 10)
-                                            : "-"}
+                    {orders.map((order, index) => {
+                        const items = order.orderItems || [];
+                        const orderId = order.id; 
+                        
+                        return (
+                            <div
+                                key={orderId}
+                                className="bg-white rounded-2xl shadow-lg border p-6 hover:shadow-2xl transition-all transform hover:scale-[1.01] animate__animated animate__fadeInUp"
+                                style={{ animationDelay: `${index * 0.08}s` }}
+                            >
+                                {/* Header */}
+                                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">
+                                            Order #{orderId}
+                                        </h3>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Placed:{" "}
+                                            {order.createdAt
+                                                ? order.createdAt.substring(0, 10)
+                                                : "-"}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-6 items-center">
+                                        <span
+                                            className={`px-4 py-1.5 rounded-full text-sm font-semibold shadow ${
+                                                order.isPaid
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-yellow-100 text-yellow-700"
+                                            }`}
+                                        >
+                                            {order.isPaid ? "Paid" : "Pending"}
+                                        </span>
+
+                                        <div className="text-right">
+                                            <p className="text-gray-600 text-sm">
+                                                Total
+                                            </p>
+                                            <p className="text-cyan-700 font-bold text-lg">
+                                                ₹{order.totalPrice ?? 0}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Items */}
+                                <div className="mt-4 flex items-center gap-4 overflow-x-auto pb-2">
+                                    {items.length > 0 ? (
+                                        items.slice(0, 6).map((item, i) => (
+                                            <img
+                                                key={item._id ?? i}
+                                                src={item.image}
+                                                alt={item.name || "Product"}
+                                                loading="lazy"
+                                                className="w-20 h-20 rounded-lg object-cover shadow border hover:scale-105 transition-transform"
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="text-gray-500 text-sm">
+                                            No items
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Footer */}
+                                <div className="mt-4 flex justify-between items-center">
+                                    <p className="text-gray-600 text-sm">
+                                        {items.length} item
+                                        {items.length !== 1 ? "s" : ""}
                                     </p>
-                                </div>
 
-                                <div className="flex gap-6 items-center">
-                                    <span
-                                        className={`px-4 py-1.5 rounded-full text-sm font-semibold shadow ${
-                                            order.isPaid
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-yellow-100 text-yellow-700"
-                                        }`}
+                                    <Link
+                                        to={`/order/${orderId}`}
+                                        className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm shadow-md hover:bg-blue-700 transition-all animate__animated animate__fadeInRight"
                                     >
-                                        {order.isPaid ? "Paid" : "Pending"}
-                                    </span>
-
-                                    <div className="text-right">
-                                        <p className="text-gray-600 text-sm">
-                                            Total
-                                        </p>
-                                        <p className="text-cyan-700 font-bold text-lg">
-                                            ₹{order.totalPrice ?? 0}
-                                        </p>
-                                    </div>
+                                        View Details
+                                    </Link>
                                 </div>
                             </div>
-
-                            {/* Items */}
-                            <div className="mt-4 flex items-center gap-4 overflow-x-auto pb-2">
-                                {order.items?.length > 0 ? (
-                                    order.items.slice(0, 6).map((item, i) => (
-                                        <img
-                                            key={item._id ?? item.id ?? i}
-                                            src={item.image}
-                                            alt={
-                                                item.name ??
-                                                item.title ??
-                                                "Product"
-                                            }
-                                            loading="lazy"
-                                            className="w-20 h-20 rounded-lg object-cover shadow border hover:scale-105 transition-transform"
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="text-gray-500 text-sm">
-                                        No items
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="mt-4 flex justify-between items-center">
-                                <p className="text-gray-600 text-sm">
-                                    {order.items?.length || 0} item
-                                    {order.items?.length !== 1 ? "s" : ""}
-                                </p>
-
-                                <Link
-                                    to={`/order/${order.id}`}
-                                    className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm shadow-md hover:bg-blue-700 transition-all animate__animated animate__fadeInRight"
-                                >
-                                    View Details
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </Layout>

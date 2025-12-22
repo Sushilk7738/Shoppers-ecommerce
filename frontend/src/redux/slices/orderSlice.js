@@ -21,7 +21,7 @@ export const fetchOrderDetails = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const data = await orderAPI.getOrderDetails(id);
-            return data ? normalizeOrder(data) : null;
+            return data;
         } catch (err) {
             return rejectWithValue(err?.message || err);
         }

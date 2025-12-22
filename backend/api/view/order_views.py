@@ -74,7 +74,7 @@ def addOrderItems(request):
 def getMyOrders(request):
     user = request.user
     orders = user.order_set.all()
-    serializer = OrderSerializer(orders, many = True)
+    serializer = OrderSerializer(orders, many = True, context = {"request" :request})
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -85,7 +85,7 @@ def getOrderById(request, pk):
     try:
         order = Order.objects.get(_id = pk)
         if order.user == user:
-            serializer = OrderSerializer(order, many = False)
+            serializer = OrderSerializer(order, many = False, context={"request": request})
             return Response(serializer.data)
 
         else:

@@ -48,9 +48,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         
         
         
-        
-
-
 class UserSerializerWithToken(UserSerializer):
     token = serializers.SerializerMethodField(read_only=True)
 
@@ -127,42 +124,39 @@ class OrderItemSerializer(serializers.ModelSerializer):
         return obj.image
 
 
+from decimal import Decimal
+
 class OrderSerializer(serializers.ModelSerializer):
     orderItems = serializers.SerializerMethodField(read_only=True)
-    ShippingAddress = serializers.SerializerMethodField(read_only=True)
-    User = serializers.SerializerMethodField(read_only=True)
-    totalPrice = serializers.FloatField(read_only=True)
-    
+    itemsPrice = serializers.SerializerMethodField(read_only=True)
+    shippingAddress = serializers.SerializerMethodField(read_only=True)
+    userInfo = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Order
-        fields = [
-            "_id",
-            "user",
-            "paymentMethod",
-            "taxPrice",
-            "shippingPrice",
-            "totalPrice",   
-            "isPaid",
-            "paidAt",
-            "isDelivered",
-            "createdAt",
-            "orderItems",
-            "ShippingAddress",
-            "User",
-        ]
-
+        fields = "__all__"
 
     def get_orderItems(self, obj):
         items = obj.orderitem_set.all()
         return OrderItemSerializer(items, many=True, context=self.context).data
 
-    def get_ShippingAddress(self, obj):
+    def get_itemsPrice(self, obj):
+        total = Decimal("0.00")
+        for item in obj.orderitem_set.all():
+            qty = item.qty or 0
+            price = item.price or Decimal("0.00")
+            total += price * qty
+        return total
+
+    def get_shippingAddress(self, obj):
         if hasattr(obj, "shippingaddress"):
             return ShippingAddressSerializer(obj.shippingaddress, many=False).data
         return None
 
-    def get_User(self, obj):
+    def get_userInfo(self, obj):
         return UserSerializer(obj.user, many=False).data
+
+
 
 
 class ContactSerializer(serializers.ModelSerializer):

@@ -5,7 +5,9 @@ import Layout from "../components/Layout";
 import { useToast } from "../context/ToastContext";
 import { clearCart } from "../redux/slices/cartSlice";
 import { orderAPI } from "../api/order.api";
+import { getAuthToken } from "../utils/Auth";
 import "animate.css";
+
 
 const Checkout = () => {
     const { showToast } = useToast();
@@ -13,7 +15,7 @@ const Checkout = () => {
     const dispatch = useDispatch();
 
     const cart = useSelector((state) => state.cart.cartItems) || [];
-    const token = useSelector((state) => state.user.token);
+    const token =getAuthToken()
 
     const [form, setForm] = useState({
         fullName: "",
@@ -86,7 +88,11 @@ const Checkout = () => {
             order_id: order.id,
             name: "Shoppers Store",
             description: "Order Payment",
-            handler: verifyPayment,
+            handler: async function(response) {
+                console.log("RAZORPAY SUCCESS", response);
+                
+                await verifyPayment(response)
+            },
             prefill: {
             name: form.fullName,
             contact: form.mobile,
