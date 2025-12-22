@@ -1,5 +1,4 @@
-// src/utils/normalize.js
-
+//product normalizer
 export const normalizeProduct = (product = {}) => {
     return {
         _id: product._id ?? product.id ?? null,
@@ -24,33 +23,19 @@ export const normalizeProduct = (product = {}) => {
     };
 };
 
+//order normalizer
 export const normalizeOrder = (order = {}) => {
-    const items = order.orderItems ?? order.order_items ?? [];
-
     return {
-        id: order._id ?? order.id ?? null,
+        ...order,                        
+        _id: order._id ?? order.id ?? null,
 
+        orderItems: Array.isArray(order.orderItems)
+            ? order.orderItems
+            : [],
+
+        totalPrice: Number(order.totalPrice ?? 0),
         isPaid: Boolean(order.isPaid ?? false),
         isDelivered: Boolean(order.isDelivered ?? false),
-
-        totalPrice: Number(
-            order.totalPrice ??
-            order.total_price ??
-            order.amount ??
-            0
-        ),
-
-        createdAt:
-            order.createdAt ??
-            order.created_at ??
-            null,
-
-        status: order.status ?? null,
-        items,
-
-        shippingAddress:
-            order.ShippingAddress ??
-            order.shippingAddress ??
-            null,
+        createdAt: order.createdAt ?? null,
     };
 };
