@@ -15,7 +15,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 #Local Import
 from api.models import * 
-from api.serializers import UserSerializer, UserSerializerWithToken
+from api.serializers import UserSerializer, UserSerializerWithToken, UserRegisterSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -56,22 +56,14 @@ def getRoutes(request):
 
 @api_view(['POST'])
 def registerUser(request):
-    data = request.data
-    try:
-        user = User.objects.create(
-            first_name = data['name'],
-            username = data['email'],
-            email = data['email'],
-            password = make_password(data['password']),
-            is_active = True
-        )
+    serializer = UserRegisterSerializer(data=request.data)
 
-        serializer = UserSerializerWithToken(user, many = False)
-        return Response(serializer.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        token_serializer = UserSerializerWithToken(user, many=False)
+        return Response(token_serializer.data, status=status.HTTP_201_CREATED)
 
-    except:
-        message = {'detail' : "User with this email is already registered!"}
-        return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
