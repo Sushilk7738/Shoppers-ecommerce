@@ -11,6 +11,7 @@ def create_order_from_cart(
     shipping_address=None,
     mark_paid=False
 ):
+    # Create Order
     order = Order.objects.create(
         user=user,
         paymentMethod=payment_method,
@@ -30,13 +31,15 @@ def create_order_from_cart(
                 product = None
 
         qty = int(item.get("qty", 0))
+
         price = (
             Decimal(item.get("offer_price"))
             if item.get("offer_price") is not None
             else Decimal(item.get("price", 0))
         )
 
-        order_item = OrderItem.objects.create(
+        OrderItem.objects.create(
+            order=order,              
             product=product,
             name=item.get("name"),
             qty=qty,
@@ -44,13 +47,11 @@ def create_order_from_cart(
             image=item.get("image", ""),
         )
 
-        order_item.order_id = order._id
-        order_item.save()
-
         if product:
             product.countInStock -= qty
             product.save()
 
+    # Shipping Address
     if shipping_address:
         ShippingAddress.objects.create(
             order=order,
