@@ -29,53 +29,57 @@ const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-    showToast("Passwords do not match!");
+        showToast("Passwords do not match!");
+        return;
+}
+
+try {
+    const response = await fetch(`${BASE_URL}/api/users/register/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        name: fullname,
+        email: email.trim().toLowerCase(),
+        password,
+    }),
+    });
+
+    //check status
+    if (!response.ok) {
+    let errorText = "Signup failed";
+
+    try {
+        const errorData = await response.json();
+        errorText =
+        errorData?.email?.[0] ||
+        errorData?.detail ||
+        errorText;
+    } catch {
+        
+    }
+
+    showToast(errorText);
     return;
     }
 
-    try {
-    const response = await fetch(
-        `${BASE_URL}/api/users/register/`,
-        {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            name: fullname,
-            email: email.trim().toLowerCase(),
-            password: password,
-        }),
-        }
-    );
-
+    // SUCCESS PATH
     const data = await response.json();
 
-    if (!response.ok) {
-        showToast(data.detail || "Signup failed!");
-        return;
+    if (data?.token) {
+        localStorage.setItem("token", data.token);
     }
+    
+    localStorage.setItem("userInfo", JSON.stringify(data));
+    
+    dispatch(loginSuccess(data));
 
     showToast("Signup successful!");
-
-    // auto-login
-    if (data.token) {
-        localStorage.setItem("token", data.token);
-
-        const userData = {
-        username: data.user?.username || email,
-        email: data.user?.email || email,
-        };
-
-        localStorage.setItem("userInfo", JSON.stringify(userData));
-        dispatch(loginSuccess(userData));
-    }
-
     navigate("/");
-    } catch (error) {
-    console.log(error);
-    showToast("Something went wrong!");
-    }
+
+} catch (err) {
+    console.error(err);
+    showToast("Network error");
+}
 };
 
 return (

@@ -9,7 +9,7 @@ loginSuccess,
 loginFailure,
 } from "../redux/slices/userSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL; // api
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
 const navigate = useNavigate();
@@ -36,46 +36,25 @@ const handleSubmit = async (e) => {
     dispatch(loginStart());
 
     try {
-    const response = await fetch(
-        `${BASE_URL}/api/users/login/`,
-        {
+    const response = await fetch(`${BASE_URL}/api/users/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            username: email,
-            password: password,
+        username: email,
+        password: password,
         }),
-        }
-    );
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
-        const errMsg =
-        data?.detail || JSON.stringify(data) || "Invalid credentials";
+        const errMsg = data?.detail || "Invalid credentials";
         dispatch(loginFailure(errMsg));
         showToast(errMsg);
         return;
     }
 
-    const token = data?.access || data?.token || null;
-    const refresh = data?.refresh || null;
-
-    const user = {
-        id: data?.id,
-        name: data?.name || data?.username,
-        username: data?.username,
-        email: data?.email,
-        token: token,
-    };
-
-    try {
-        localStorage.setItem("userInfo", JSON.stringify(user));
-        if (token) localStorage.setItem("token", token);
-        if (refresh) localStorage.setItem("refresh", refresh);
-    } catch {}
-
-    dispatch(loginSuccess({ user }));
+    dispatch(loginSuccess(data));
 
     showToast("Login Successful!");
     navigate("/");

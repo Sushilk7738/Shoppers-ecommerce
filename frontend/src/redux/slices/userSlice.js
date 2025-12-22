@@ -11,7 +11,7 @@ const initialState = {
 const userSlice = createSlice({
     name: "user",
     initialState,
-    
+
     reducers: {
         loginStart(state) {
             state.loading = true;
@@ -19,14 +19,15 @@ const userSlice = createSlice({
         },
 
         loginSuccess(state, action) {
-            const { user } = action.payload;
+            if (!action.payload) return;
 
-            state.user = user;
-            state.token = user.token;
+            state.user = action.payload;
+            state.token = action.payload.token || null;
+
             state.loading = false;
             state.error = null;
 
-            saveUserInfo(user);
+            saveUserInfo(action.payload);
         },
 
         loginFailure(state, action) {

@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
     const dispatch = useDispatch();
 
     // guard
-    const user = useSelector((state) => state.user?.user || null);
+    const user = useSelector((state) => state.user || null);
     const cartItems = useSelector(
         (state) => state.cart?.cartItems || []
     );
