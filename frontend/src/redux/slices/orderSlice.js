@@ -10,14 +10,12 @@ export const fetchMyOrders = createAsyncThunk(
             const data = await orderAPI.listMyOrders();
             return Array.isArray(data) ? data.map(normalizeOrder) : [];
         } catch (err) {
-            return rejectWithValue(
-                err?.response?.data || err?.message || err
-            );
+            return rejectWithValue(err?.message || err);
         }
     }
 );
 
-// fetch single order details
+// fetch single order
 export const fetchOrderDetails = createAsyncThunk(
     "order/fetchOrderDetails",
     async (id, { rejectWithValue }) => {
@@ -25,9 +23,7 @@ export const fetchOrderDetails = createAsyncThunk(
             const data = await orderAPI.getOrderDetails(id);
             return data ? normalizeOrder(data) : null;
         } catch (err) {
-            return rejectWithValue(
-                err?.response?.data || err?.message || err
-            );
+            return rejectWithValue(err?.message || err);
         }
     }
 );
@@ -42,7 +38,6 @@ const orderSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // my orders
             .addCase(fetchMyOrders.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -56,7 +51,6 @@ const orderSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // order details
             .addCase(fetchOrderDetails.pending, (state) => {
                 state.loading = true;
                 state.error = null;
