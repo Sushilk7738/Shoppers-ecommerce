@@ -10,24 +10,27 @@ import Contact from "./pages/Contact.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import OrderDetails from "./pages/OrderDetails";
 import NotFound from "./pages/NotFound.jsx";
+import PrivateRoute from "./routes/PrivateRoute.jsx";
 
 
 export default function App() {
   return (
     <Routes>
-      <Route path="*" element={<NotFound/>} />
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products/>} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout/>} />
       <Route path="/login" element={<Login/>} />
       <Route path="/signup" element={<Signup/>} />
       <Route path="/about" element={<About/>} />
       <Route path="/contact-us" element={<Contact/>} />
-      <Route path="/my-orders" element={<MyOrders/>} />
-      <Route path="/order/:id" element={<OrderDetails/>} />
 
+      <Route element = {<PrivateRoute/>}>
+        <Route path="/checkout" element={<Checkout/>} />
+        <Route path="/my-orders" element={<MyOrders/>} />
+        <Route path="/order/:id" element={<OrderDetails/>} />
+      </Route>
       
+      <Route path="*" element={<NotFound/>} />
     </Routes>
   );
 }

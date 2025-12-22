@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import orderAPI from "../../mocks/order";
+import { orderAPI } from "../../api/order.api";
 import { normalizeOrder } from "../../utils/normalize";
 
 // fetch my orders
