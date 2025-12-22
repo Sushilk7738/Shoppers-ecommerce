@@ -61,8 +61,8 @@ const MyOrders = () => {
                 <div className="space-y-8">
                     {orders.map((order, index) => {
                         const items = order.orderItems || [];
-                        const orderId = order.id; 
-                        
+                        const orderId = order._id || order.id;
+
                         return (
                             <div
                                 key={orderId}
@@ -106,16 +106,23 @@ const MyOrders = () => {
                                 </div>
 
                                 {/* Items */}
-                                <div className="mt-4 flex items-center gap-4 overflow-x-auto pb-2">
+                                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                     {items.length > 0 ? (
                                         items.slice(0, 6).map((item, i) => (
-                                            <img
+                                            <div
                                                 key={item._id ?? i}
-                                                src={item.image}
-                                                alt={item.name || "Product"}
-                                                loading="lazy"
-                                                className="w-20 h-20 rounded-lg object-cover shadow border hover:scale-105 transition-transform"
-                                            />
+                                                className="flex flex-col items-center text-center"
+                                            >
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name || "Product"}
+                                                    loading="lazy"
+                                                    className="w-20 h-20 rounded-lg object-cover shadow border"
+                                                />
+                                                <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
+                                                    {item.name}
+                                                </p>
+                                            </div>
                                         ))
                                     ) : (
                                         <div className="text-gray-500 text-sm">
@@ -133,7 +140,7 @@ const MyOrders = () => {
 
                                     <Link
                                         to={`/order/${orderId}`}
-                                        className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm shadow-md hover:bg-blue-700 transition-all animate__animated animate__fadeInRight"
+                                        className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm shadow-md hover:bg-blue-700 transition-all"
                                     >
                                         View Details
                                     </Link>
