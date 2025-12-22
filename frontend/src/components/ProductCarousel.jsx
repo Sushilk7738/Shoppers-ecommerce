@@ -7,9 +7,7 @@ import { useToast } from "../context/ToastContext";
 
 // swiper
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
 
 const ProductCarousel = ({ category, products = [] }) => {
     const dispatch = useDispatch();
@@ -133,8 +131,6 @@ const ProductCarousel = ({ category, products = [] }) => {
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={12}
-                    pagination={{ clickable: true }}
-                    modules={[Pagination]}
                 >
                     {products.map((product) => (
                         <SwiperSlide key={product._id}>

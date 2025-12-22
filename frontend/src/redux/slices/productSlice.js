@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import productAPI from "../../mocks/product";
+// import productAPI from "../../mocks/product";
+import { productAPI } from "../../api/product.api";
 import { normalizeProduct } from "../../utils/normalize";
 
 const initialState = {
@@ -104,44 +105,37 @@ export const {
 } = productSlice.actions;
 
 export const fetchProductList =
-    (keyword = "", pageNumber = "") =>
-    async (dispatch) => {
-        try {
-            dispatch(productListRequest());
+(keyword = "", pageNumber = "") =>
+async (dispatch) => {
+    try {
+    dispatch(productListRequest());
 
-            const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/products/?search=${keyword}&page=${pageNumber}`
-            );
+    const data = await productAPI.getProducts(keyword, pageNumber);
 
-            if (!res.ok) {
-                throw new Error("Failed to fetch products");
-            }
+    const rawProducts = Array.isArray(data.products)
+        ? data.products
+        : Array.isArray(data)
+        ? data
+        : [];
 
-            const data = await res.json();
+    const normalizedProducts = rawProducts.map(normalizeProduct);
 
-            const rawProducts = Array.isArray(data)
-                ? data
-                : Array.isArray(data.products)
-                ? data.products
-                : [];
+    dispatch(
+        productListSuccess({
+        products: normalizedProducts,
+        page: data.page ?? 0,
+        pages: data.pages ?? 0,
+        })
+    );
+    } catch (error) {
+    dispatch(
+        productListFailure(
+        error?.message || "Failed to load products"
+        )
+    );
+    }
+};
 
-            const normalizedProducts = rawProducts.map(normalizeProduct);
-
-            dispatch(
-                productListSuccess({
-                    products: normalizedProducts,
-                    page: data.page ?? 0,
-                    pages: data.pages ?? 0,
-                })
-            );
-        } catch (error) {
-            dispatch(
-                productListFailure(
-                    error?.message || "Failed to load products"
-                )
-            );
-        }
-    };
 
 export const fetchProductDetails = (id) => async (dispatch) => {
     try {

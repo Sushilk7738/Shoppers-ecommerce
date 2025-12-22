@@ -21,7 +21,6 @@ const Products = () => {
     }, [dispatch, products.length]);
 
     
-    // group by category (safe + memoized)
     const groupedProducts = useMemo(() => {
         return products.reduce((acc, product) => {
             const category = product?.category || "Others";
