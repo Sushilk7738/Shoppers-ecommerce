@@ -64,6 +64,7 @@ def verify_payment(request):
         data = request.data
 
         amount = data.get("amount")
+        amount = int(float(amount))
         cart_items = data.get("cartItems", [])
 
         print("AMOUNT RECEIVED:", amount)
