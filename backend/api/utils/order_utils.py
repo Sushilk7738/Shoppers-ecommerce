@@ -1,7 +1,8 @@
 from api.models import Order, OrderItem, ShippingAddress, Product
 from django.utils import timezone
-from decimal import Decimal
+from django.db import transaction
 
+@transaction.atomic
 def create_order_from_cart(
     *,
     user,
@@ -11,47 +12,46 @@ def create_order_from_cart(
     shipping_address=None,
     mark_paid=False
 ):
-    # Create Order
+    calculated_total = 0
+
+    for item in cart_items:
+        qty = int(item.get("qty", 0))
+        price = float(item.get("price", 0))
+        calculated_total += qty * price
+
     order = Order.objects.create(
         user=user,
         paymentMethod=payment_method,
-        totalPrice=Decimal(total_price),
+        totalPrice=calculated_total,
         isPaid=mark_paid,
         paidAt=timezone.now() if mark_paid else None,
     )
 
+    order.refresh_from_db()
+
     for item in cart_items:
         product = None
-        raw_id = item.get("_id")
+        raw_id = item.get("_id") or item.get("id")
 
         if raw_id:
             try:
                 product = Product.objects.get(_id=int(raw_id))
             except Product.DoesNotExist:
-                product = None
-
-        qty = int(item.get("qty", 0))
-
-        price = (
-            Decimal(item.get("offer_price"))
-            if item.get("offer_price") is not None
-            else Decimal(item.get("price", 0))
-        )
+                pass
 
         OrderItem.objects.create(
-            order=order,              
+            order=order,                     
             product=product,
-            name=item.get("name"),
-            qty=qty,
-            price=price,
+            name=item.get("title") or item.get("name"),
+            qty=int(item.get("qty", 0)),
+            price=item.get("price", 0),
             image=item.get("image", ""),
         )
 
         if product:
-            product.countInStock -= qty
+            product.countInStock -= int(item.get("qty", 0))
             product.save()
 
-    # Shipping Address
     if shipping_address:
         ShippingAddress.objects.create(
             order=order,
@@ -59,7 +59,7 @@ def create_order_from_cart(
             city=shipping_address.get("city", ""),
             postalCode=shipping_address.get("postalCode", ""),
             country=shipping_address.get("country", "India"),
-            shippingPrice=Decimal(shipping_address.get("shippingPrice", 0)),
+            shippingPrice=shipping_address.get("shippingPrice", 0),
         )
 
     return order
