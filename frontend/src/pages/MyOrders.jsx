@@ -106,28 +106,36 @@ const MyOrders = () => {
                                 </div>
 
                                 {/* Items */}
-                                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                {/* Items */}
+                                <div className="mt-4 space-y-3">
                                     {items.length > 0 ? (
-                                        items.slice(0, 6).map((item, i) => (
+                                        items.slice(0, 3).map((item, i) => (
                                             <div
                                                 key={item._id ?? i}
-                                                className="flex flex-col items-center text-center"
+                                                className="flex items-center gap-4 p-3 border rounded-lg bg-gray-50"
                                             >
                                                 <img
                                                     src={item.image}
-                                                    alt={item.name || "Product"}
-                                                    loading="lazy"
-                                                    className="w-20 h-20 rounded-lg object-cover shadow border"
+                                                    alt={item.name}
+                                                    className="w-16 h-16 rounded-md object-cover border"
                                                 />
-                                                <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
-                                                    {item.name}
-                                                </p>
+
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-semibold text-gray-900">
+                                                        {item.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        Qty: {item.qty ?? 1}
+                                                    </p>
+                                                </div>
+
+                                                <div className="text-sm font-bold text-cyan-700">
+                                                    ₹{item.price}
+                                                </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-gray-500 text-sm">
-                                            No items
-                                        </div>
+                                        <p className="text-sm text-gray-500">No items</p>
                                     )}
                                 </div>
 
