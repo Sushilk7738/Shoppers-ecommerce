@@ -1,27 +1,25 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Product, Review, Order, OrderItem, ShippingAddress, Contact
 
 
 class UserSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk", read_only=True)
     name = serializers.SerializerMethodField(read_only=True)
-    _id = serializers.SerializerMethodField(read_only=True)
     isAdmin = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin"]
-
-    def get__id(self, obj):
-        return obj.id
+        fields = ["id", "username", "email", "name", "isAdmin"]
 
     def get_isAdmin(self, obj):
         return obj.is_staff
 
     def get_name(self, obj):
         return obj.first_name if obj.first_name else obj.email
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only = True)        
@@ -48,12 +46,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         
         
         
-class UserSerializerWithToken(UserSerializer):
+class UserSerializerWithToken(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk", read_only=True)
+    name = serializers.SerializerMethodField(read_only=True)
+    isAdmin = serializers.SerializerMethodField(read_only=True)
     token = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin", "token"]
+        fields = ["id", "username", "email", "name", "isAdmin", "token"]
+
+    def get_isAdmin(self, obj):
+        return obj.is_staff
+
+    def get_name(self, obj):
+        return obj.first_name if obj.first_name else obj.email
 
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)
@@ -67,13 +74,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk", read_only=True)
     image = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            "_id",
+            "id",
             "name",
             "image",
             "brand",
@@ -127,6 +135,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 from decimal import Decimal
 
 class OrderSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk", read_only=True)
     orderItems = serializers.SerializerMethodField(read_only=True)
     itemsPrice = serializers.SerializerMethodField(read_only=True)
     shippingAddress = serializers.SerializerMethodField(read_only=True)
@@ -135,7 +144,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            "_id",
+            "id",
             "user",
             "paymentMethod",
             "taxPrice",
@@ -158,18 +167,16 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_itemsPrice(self, obj):
         total = Decimal("0.00")
         for item in obj.orderitem_set.all():
-            qty = item.qty or 0
-            price = item.price or Decimal("0.00")
-            total += price * qty
+            total += (item.price or Decimal("0.00")) * (item.qty or 0)
         return total
 
     def get_shippingAddress(self, obj):
         if hasattr(obj, "shippingaddress"):
-            return ShippingAddressSerializer(obj.shippingaddress, many=False).data
+            return ShippingAddressSerializer(obj.shippingaddress).data
         return None
 
     def get_userInfo(self, obj):
-        return UserSerializer(obj.user, many=False).data
+        return UserSerializer(obj.user).data
 
 
 
@@ -178,3 +185,31 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = "__all__"
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        email = attrs.get("username")   
+        password = attrs.get("password")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid credentials")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid credentials")
+
+        data = super().validate({
+            "username": user.username,   
+            "password": password,
+        })
+
+        data["user"] = {
+            "id": user.id,
+            "email": user.email,
+            "name": user.first_name,
+            "isAdmin": user.is_staff,
+        }
+
+        return data

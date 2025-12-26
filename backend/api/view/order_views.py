@@ -17,57 +17,6 @@ from api.serializers import ProductSerializer, OrderSerializer
 
 
 # views starts from here
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def addOrderItems(request):
-    user = request.user
-    data = request.data
-    print(data)
-    orderItems = data['orderItems'] 
-    
-    if orderItems and len(orderItems) == 0:
-        return Response({'detail' : 'No Order Items', 'status':status.HTTP_400_BAD_REQUEST})
-    else:
-        # 1. Create order
-        order = Order.objects.create(
-            user = user,
-            paymentMethod = data['paymentMethod'],
-            taxPrice = data['taxPrice'],
-            shippingPrice = data['shippingPrice'],
-            totalPrice = data['totalPrice'],
-        )
-
-        # 2. creating shipping address 
-
-        shipping = ShippingAddress.objects.create(
-            order = order,
-            address = data['shippingAddress']['address'],
-            city = data['shippingAddress']['city'],
-            postalCode = data['shippingAddress']['postalCode'],
-            country = data['shippingAddress']['country'],
-        )
-
-        #3. Create order items
-        
-        for i in orderItems:
-            product = Product.objects.get(_id= i['_id'])
-
-            item = OrderItem.objects.create(
-                product = product,
-                order = order,
-                name = product.name,
-                qty = i['qty'],
-                price = i['price'],
-                image = product.image.url,   
-            )
-
-            #4 update stock
-        
-            product.countInStock -= int(item.qty)
-            product.save()
-    
-    serializer = OrderSerializer(order, many = False)
-    return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

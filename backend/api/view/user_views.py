@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
+from rest_framework import serializers
 
 #REST FRAMEWORK JWT
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -19,12 +20,23 @@ from api.serializers import UserSerializer, UserSerializerWithToken, UserRegiste
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        data = super().validate(attrs)
+        email = attrs.get("username")
+        password = attrs.get("password")
 
-        serializer = UserSerializerWithToken(self.user).data
-        for k, v in serializer.items():
-            data[k] = v
-        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid credentials")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid credentials")
+
+        data = super().validate({
+            "username": user.username,
+            "password": password,
+        })
+
+        data["user"] = UserSerializerWithToken(user).data
         return data
 
     @classmethod
