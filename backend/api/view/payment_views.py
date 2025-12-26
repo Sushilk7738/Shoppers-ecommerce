@@ -95,12 +95,27 @@ def verify_payment(request):
             shipping_address=address_data,
             mark_paid=True,
         )
+        
+        try:
+            # Generate invoice PDF bytes
+            pdf_content = generate_invoice_pdf_bytes(order, request.user)
 
+            # Send order success email
+            send_order_success_email(
+                user_email=request.user.email,
+                order_id=order.pk,
+                pdf_content=pdf_content,
+            )
+            print("EMAIL SENT FUNCTION CALLED")
+        except Exception as e :
+            print("EMAIL FAILED", e)
+            
         serializer = OrderSerializer(order, context={"request": request})
         return Response(serializer.data, status=200)
 
     except Exception as e:
-        print("VERIFY PAYMENT ERROR:", str(e))
+        import traceback
+        traceback.print_exc()  
         return Response(
             {"detail": "Payment verification failed", "error": str(e)},
             status=500

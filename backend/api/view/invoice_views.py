@@ -165,6 +165,6 @@ def generate_invoice_pdf_bytes(order, user):
     )
 
     if pisa_status.err:
-        return None
+        raise Exception("Invoice PDF generation failed")
 
     return result.getvalue()
