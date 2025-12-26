@@ -58,71 +58,39 @@ def create_order(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def verify_payment(request):
-    print("VERIFY USER:", request.user, request.user.is_authenticated)
+    data = request.data
+
+    amount = int(float(data.get("amount", 0)))
+    cart_items = data.get("cartItems", [])
+
+    client.utility.verify_payment_signature({
+        "razorpay_order_id": data.get("razorpay_order_id"),
+        "razorpay_payment_id": data.get("razorpay_payment_id"),
+        "razorpay_signature": data.get("razorpay_signature"),
+    })
+
+    order = create_order_from_cart(
+        user=request.user,
+        payment_method="Razorpay",
+        total_price=amount,
+        cart_items=cart_items,
+        shipping_address=data.get("address"),
+        mark_paid=True,
+    )
+
+    response = Response(
+        OrderSerializer(order, context={"request": request}).data,
+        status=200
+    )
+
+    #  email 
     try:
-        data = request.data
-
-        amount = data.get("amount")
-        amount = int(float(amount))
-        cart_items = data.get("cartItems", [])
-
-        print("AMOUNT RECEIVED:", amount)
-        print("CART ITEMS:", cart_items)
-
-        razorpay_order_id = data.get("razorpay_order_id")
-        razorpay_payment_id = data.get("razorpay_payment_id")
-        razorpay_signature = data.get("razorpay_signature")
-
-        if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
-            return Response({"detail": "Invalid payment data"}, status=400)
-
-        try:
-            client.utility.verify_payment_signature({
-                "razorpay_order_id": razorpay_order_id,
-                "razorpay_payment_id": razorpay_payment_id,
-                "razorpay_signature": razorpay_signature,
-            })
-        except razorpay.errors.SignatureVerificationError:
-            return Response({"detail": "Payment verification failed"}, status=400)
-
-        address_data = data.get("address")
-
-        order = create_order_from_cart(
-            user=request.user,
-            payment_method="Razorpay",
-            total_price=amount,
-            cart_items=cart_items,
-            shipping_address=address_data,
-            mark_paid=True,
+        send_order_success_email(
+            user_email=request.user.email,
+            order_id=order.pk,
+            pdf_content=None,  # text-only invoice 
         )
-        
-        pdf_content = None
-        
-        try:
-            # Generate invoice PDF bytes
-            pdf_content = generate_invoice_pdf_bytes(order, request.user)
-        except Exception as e:
-            print("PDF FAILED:", e)
-            
-            
-        try:
-            # Send order success email
-            send_order_success_email(
-                user_email=request.user.email,
-                order_id=order.pk,
-                pdf_content=pdf_content,
-            )
-            print("EMAIL SENT FUNCTION CALLED")
-        except Exception as e :
-            print("EMAIL FAILED", e)
-
-        serializer = OrderSerializer(order, context={"request": request})
-        return Response(serializer.data, status=200)
-
     except Exception as e:
-        import traceback
-        traceback.print_exc()  
-        return Response(
-            {"detail": "Payment verification failed", "error": str(e)},
-            status=500
-        )
+        print("EMAIL FAILED (ignored):", e)
+
+    return response
