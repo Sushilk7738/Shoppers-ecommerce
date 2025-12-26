@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <style>
@@ -106,83 +107,88 @@
 </head>
 
 <body>
-<div class="container">
+    <div class="container">
 
-    <!-- HEADER -->
-    <div class="header">
-        <img src="{{ logo_path }}" class="logo" />
-        <div class="title">Invoice</div>
-        <div class="subtitle">Thank you for shopping with Shoppers</div>
-    </div>
+        <!-- HEADER -->
+        <div class="header">
 
-    <!-- ORDER INFO -->
-    <div class="section-title">Order Information</div>
-    <div class="divider"></div>
+            {% if logo_path %}
+                <img src="{{ logo_path }}" class="logo" />
+            {% endif %}
 
-    <div class="order-info">
-        <strong>Order ID:</strong> {{ order.id }} <br />
-        <strong>Date:</strong> {{ order.created }} <br />
-        <strong>Payment:</strong> {{ order.paymentMethod }} <br />
-        <strong>Status:</strong> {{ order.isPaid|yesno:"Paid,Pending" }}
-    </div>
-
-    <!-- SHIPPING -->
-    <div class="section-title">Shipping Address</div>
-    <div class="divider"></div>
-
-    {% if shipping %}
-    <div class="shipping-info">
-        {{ shipping.fullName }} <br />
-        {{ shipping.address }} <br />
-        {{ shipping.city }} - {{ shipping.postalCode }} <br />
-        {{ shipping.country }}
-    </div>
-    {% else %}
-    <div>No address available</div>
-    {% endif %}
-
-    <!-- ITEMS -->
-    <div class="section-title">Items</div>
-    <div class="divider"></div>
-
-    <table>
-        <thead>
-        <tr>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Price (Rs.)</th>
-            <th>Total (Rs.)</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in items %}
-        <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.qty }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.price|floatformat:0 }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- SUMMARY -->
-    <div class="section-title">Price Summary</div>
-    <div class="divider"></div>
-
-    <div class="summary">
-        Items Total: Rs. {{ order.itemsPrice }} <br />
-        Shipping: Rs. {{ order.shippingPrice }} <br />
-        <div class="summary-total">
-            Grand Total: Rs. {{ order.total }}
+            <div class="title">Invoice</div>
+            <div class="subtitle">Thank you for shopping with Shoppers</div>
         </div>
-    </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-        Smart Shopping Made Simple — Shoppers © 2025
-    </div>
+        <!-- ORDER INFO -->
+        <div class="section-title">Order Information</div>
+        <div class="divider"></div>
 
-</div>
+        <div class="order-info">
+            <strong>Order ID:</strong> {{ order.id }} <br />
+            <strong>Date:</strong> {{ order.created }} <br />
+            <strong>Payment:</strong> {{ order.paymentMethod }} <br />
+            <strong>Status:</strong> {{ order.isPaid|yesno:"Paid,Pending" }}
+        </div>
+
+        <!-- SHIPPING -->
+        <div class="section-title">Shipping Address</div>
+        <div class="divider"></div>
+
+        {% if shipping %}
+        <div class="shipping-info">
+            {{ shipping.fullName }} <br />
+            {{ shipping.address }} <br />
+            {{ shipping.city }} - {{ shipping.postalCode }} <br />
+            {{ shipping.country }}
+        </div>
+        {% else %}
+        <div>No address available</div>
+        {% endif %}
+
+        <!-- ITEMS -->
+        <div class="section-title">Items</div>
+        <div class="divider"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price (Rs.)</th>
+                    <th>Total (Rs.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.price|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- SUMMARY -->
+        <div class="section-title">Price Summary</div>
+        <div class="divider"></div>
+
+        <div class="summary">
+            Items Total: Rs. {{ order.itemsPrice }} <br />
+            Shipping: Rs. {{ order.shippingPrice }} <br />
+            <div class="summary-total">
+                Grand Total: Rs. {{ order.total }}
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            Smart Shopping Made Simple — Shoppers © 2025
+        </div>
+
+    </div>
 </body>
+
 </html>
