@@ -61,7 +61,7 @@ const MyOrders = () => {
                 <div className="space-y-8">
                     {orders.map((order, index) => {
                         const items = order.orderItems || [];
-                        const orderId = order._id || order.id;
+                        const orderId = order.id;
 
                         return (
                             <div
@@ -111,7 +111,7 @@ const MyOrders = () => {
                                     {items.length > 0 ? (
                                         items.slice(0, 3).map((item, i) => (
                                             <div
-                                                key={item._id ?? i}
+                                                key={item.id ?? i}
                                                 className="flex items-center gap-4 p-3 border rounded-lg bg-gray-50"
                                             >
                                                 <img

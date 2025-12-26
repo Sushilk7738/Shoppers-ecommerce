@@ -126,7 +126,7 @@ const calculateEstimatedDelivery = (order) => {
     /* download invoice */
     const handleInvoiceDownload = async () => {
         try {
-        const pdfBlob = await orderAPI.downloadInvoice(orderId, token);
+        const pdfBlob = await orderAPI.downloadInvoice(orderId);
         const fileUrl = window.URL.createObjectURL(pdfBlob);
         const anchor = document.createElement("a");
         anchor.href = fileUrl;
@@ -159,7 +159,7 @@ const calculateEstimatedDelivery = (order) => {
                 <header className="rounded-2xl p-6 bg-cyan-50 border shadow-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-extrabold">
-                    Order #{order._id}
+                    Order #{order.id}
                     </h1>
                     <p className="text-sm text-slate-600 mt-1">
                     Placed:{" "}
@@ -242,7 +242,7 @@ const calculateEstimatedDelivery = (order) => {
                         <div className="space-y-4">
                         {orderItems.map((orderItem) => (
                             <div
-                            key={orderItem._id}
+                            key={orderItem.id}
                             className="flex items-center gap-4 border p-3 rounded-lg"
                             >
                             <img

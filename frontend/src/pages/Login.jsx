@@ -54,12 +54,14 @@ function Login() {
                 return;
             }
 
-            // 🔥🔥 MAIN FIX — TOKEN SAVE 🔥🔥
-            if (data.token) {
-                localStorage.setItem("accessToken", data.token);
+            if (data.access) {
+                localStorage.setItem("accessToken", data.access);
             }
 
-            dispatch(loginSuccess(data));
+            dispatch(loginSuccess({
+                ...data.user,
+                token: data.access,
+            }));
 
             showToast("Login Successful!");
             navigate("/");

@@ -60,7 +60,7 @@ const Checkout = () => {
             const data = await orderAPI.verifyPayment(paymentData, token);
             showToast("Order Completed Successfully!");
             dispatch(clearCart());
-            navigate(`/order/${data._id}`);
+            navigate(`/order/${data.id}`);
         } catch {
             showToast("Payment verification failed");
         }

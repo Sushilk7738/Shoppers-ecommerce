@@ -33,4 +33,27 @@ export const orderAPI = {
             },
         });
     },
+
+    downloadInvoice: async (id) => {
+    const token = getAuthToken();
+
+    const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/orders/${id}/invoice/`,
+        {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    if (!res.ok) {
+        throw new Error("Invoice download failed");
+    }
+
+    return await res.blob();
+    },
+
 };
+
+
