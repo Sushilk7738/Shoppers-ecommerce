@@ -96,10 +96,16 @@ def verify_payment(request):
             mark_paid=True,
         )
         
+        pdf_content = None
+        
         try:
             # Generate invoice PDF bytes
             pdf_content = generate_invoice_pdf_bytes(order, request.user)
-
+        except Exception as e:
+            print("PDF FAILED:", e)
+            
+            
+        try:
             # Send order success email
             send_order_success_email(
                 user_email=request.user.email,
@@ -109,7 +115,7 @@ def verify_payment(request):
             print("EMAIL SENT FUNCTION CALLED")
         except Exception as e :
             print("EMAIL FAILED", e)
-            
+
         serializer = OrderSerializer(order, context={"request": request})
         return Response(serializer.data, status=200)
 

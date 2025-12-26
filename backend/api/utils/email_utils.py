@@ -40,4 +40,4 @@ def send_order_success_email(user_email, order_id, pdf_content):
         mimetype="application/pdf",
     )
 
-    email.send(fail_silently=False)
+    email.send(fail_silently=True)
