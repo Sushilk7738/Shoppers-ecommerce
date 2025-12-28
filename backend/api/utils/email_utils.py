@@ -1,7 +1,9 @@
 import resend
 from django.conf import settings
 
-resend.api_key = settings.RESEND_API_KEY
+
+if settings.RESEND_API_KEY:
+    resend.api_key = settings.RESEND_API_KEY
 
 
 def send_order_success_email(user_email, order_id, pdf_content):
