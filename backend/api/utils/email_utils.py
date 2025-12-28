@@ -18,7 +18,7 @@ def send_order_success_email(user_email, order_id, pdf_content):
     try:
         response = resend.Emails.send({
             "from": "Acme <onboarding@resend.dev>",
-            "to": [settings.RESEND_TEST_EMAIL],
+            "to": [getattr(settings, "RESEND_TEST_EMAIL", user_email)],
             "subject": f"Order #{order_id} - Payment Successful 🎉 order placed by {user_email}",
             "html": f"""
                 <h2>Thank you for shopping with Shoppers 🛒</h2>
