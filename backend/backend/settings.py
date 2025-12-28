@@ -169,6 +169,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = f"Shoppers <{EMAIL_HOST_USER}>"
+EMAIL_TIMEOUT = 5
+
 
 # cloudinary
 import cloudinary
