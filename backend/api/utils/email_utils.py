@@ -7,6 +7,9 @@ if settings.RESEND_API_KEY:
 
 
 def send_order_success_email(user_email, order_id, pdf_content):
+    print("EMAIL FUNC CALLED")
+    print("RESEND API KEY VALUE:", settings.RESEND_API_KEY)
+    
     if not user_email or not pdf_content:
         return
 
