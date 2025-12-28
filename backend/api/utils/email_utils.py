@@ -34,10 +34,12 @@ def send_order_success_email(user_email, order_id, pdf_content):
     
     #attach pdf
     
-    email.attach(
-        filename=f"invoice_{order_id}.pdf",
-        content=pdf_content,
-        mimetype="application/pdf",
-    )
+    if pdf_content:
+        email.attach(
+            filename=f"invoice_{order_id}.pdf",
+            content=pdf_content,
+            mimetype="application/pdf",
+        )
 
+    # IMPORTANT for Render
     email.send(fail_silently=True)
