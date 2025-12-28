@@ -1,4 +1,5 @@
 import resend
+import base64
 from django.conf import settings
 
 
@@ -9,7 +10,8 @@ if settings.RESEND_API_KEY:
 def send_order_success_email(user_email, order_id, pdf_content):
     print("EMAIL FUNC CALLED")
     print("RESEND API KEY VALUE:", settings.RESEND_API_KEY)
-    
+    encoded_pdf = base64.b64encode(pdf_content).decode("utf-8")
+
     if not user_email or not pdf_content:
         return
 
@@ -24,12 +26,14 @@ def send_order_success_email(user_email, order_id, pdf_content):
                 <p><b>Order ID:</b> {order_id}</p>
                 <p>Please find your invoice attached.</p>
             """,
+
             "attachments": [
                 {
                     "filename": f"invoice_{order_id}.pdf",
-                    "content": pdf_content,
+                    "content": encoded_pdf,
                 }
             ],
+
         })
 
         print("RESEND RESPONSE:", response)
