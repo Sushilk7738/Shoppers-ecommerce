@@ -1,45 +1,27 @@
-from django.core.mail import EmailMessage
+import resend
 from django.conf import settings
 
+resend.api_key = settings.RESEND_API_KEY
+
+
 def send_order_success_email(user_email, order_id, pdf_content):
-    subject = f"Order #{order_id} - Payment Successful🎉🔥"
+    if not user_email or not pdf_content:
+        return
 
-    body = f"""
-    Hi, 
-    
-    Thank you for shopping with Shoppers🛒
-    
-    Your payment was successful and your order has been confirmed💯.
-
-    Order ID: {order_id}
-
-    Please find your invoice attached with this email.
-
-    If you need any help, feel free to contact our support team.
-
-    Happy Shopping!
-    
-    Team Shoppers.
-    
-    """
-    
-    
-    email = EmailMessage(
-        subject= subject,
-        body= body,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[user_email],
-    )
-    
-    
-    #attach pdf
-    
-    if pdf_content:
-        email.attach(
-            filename=f"invoice_{order_id}.pdf",
-            content=pdf_content,
-            mimetype="application/pdf",
-        )
-
-    # IMPORTANT for Render
-    email.send(fail_silently=True)
+    resend.Emails.send({
+        "from": "Shoppers <onboarding@resend.dev>",
+        "to": [user_email],
+        "subject": f"Order #{order_id} - Payment Successful 🎉",
+        "html": f"""
+            <h2>Thank you for shopping with Shoppers 🛒</h2>
+            <p>Your payment was successful and your order is confirmed.</p>
+            <p><b>Order ID:</b> {order_id}</p>
+            <p>Please find your invoice attached.</p>
+        """,
+        "attachments": [
+            {
+                "filename": f"invoice_{order_id}.pdf",
+                "content": pdf_content,
+            }
+        ],
+    })
