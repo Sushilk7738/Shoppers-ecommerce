@@ -11,8 +11,9 @@ from api.utils.email_utils import send_order_success_email
 def order_success_email(sender, instance, created, **kwargs):
     print("SIGNAL HIT", created, instance.isPaid)
 
-    if instance.isPaid and getattr(settings, "ENABLE_ORDER_EMAILS", False):
+    if instance.isPaid:
         try:
+            print("EMAIL FUNC CALLED")
             pdf_content = generate_invoice_pdf_bytes(instance, instance.user)
 
             send_order_success_email(
