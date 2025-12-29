@@ -9,7 +9,8 @@ import {
     loginFailure,
 } from "../redux/slices/userSlice";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+import { loginAPI } from "../api/auth.api";
+import { saveUserInfo } from "../utils/Auth";
 
 function Login() {
     const navigate = useNavigate();
@@ -36,38 +37,25 @@ function Login() {
         dispatch(loginStart());
 
         try {
-            const response = await fetch(`${BASE_URL}/api/users/login/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    username: email,
-                    password: password,
-                }),
-            });
+            const data = await loginAPI(email, password);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                const errMsg = data?.detail || "Invalid credentials";
-                dispatch(loginFailure(errMsg));
-                showToast(errMsg);
-                return;
-            }
-
-            if (data.access) {
-                localStorage.setItem("accessToken", data.access);
-            }
-
-            dispatch(loginSuccess({
+            const userPayload = {
                 ...data.user,
                 token: data.access,
-            }));
+            };
+
+            saveUserInfo(userPayload);
+            dispatch(loginSuccess(userPayload));
 
             showToast("Login Successful!");
-            navigate("/");
+            setTimeout(() => {
+                window.location.replace("/");
+            }, 50);
+            
         } catch (error) {
-            dispatch(loginFailure(error.message || "Something went wrong"));
-            showToast("Something went wrong!");
+            const msg = error.message || "Invalid credentials";
+            dispatch(loginFailure(msg));
+            showToast(msg);
         }
     };
 
@@ -91,10 +79,7 @@ function Login() {
                         Login to continue shopping
                     </p>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="mt-8 space-y-6"
-                    >
+                    <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                         <div className="flex flex-col">
                             <label className="font-semibold text-gray-800 mb-1">
                                 Email Address

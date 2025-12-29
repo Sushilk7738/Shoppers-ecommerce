@@ -88,7 +88,7 @@ const About = () => {
 
                         <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-cyan-100">
                             <img
-                                src="/ecom.jpg"
+                                src="https://res.cloudinary.com/dcgsyosjx/image/upload/v1767019464/ecom_eeupwm.jpg"
                                 alt="Shoppers grocery delivery"
                                 className="w-full h-64 md:h-80 lg:h-96 object-cover"
                                 loading="lazy" // perf

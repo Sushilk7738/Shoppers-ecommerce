@@ -26,14 +26,14 @@ const ProductCarousel = ({ category, products = [] }) => {
         return product.price;
     }, []);
 
-    // add to cart
+    // add item
     const addToCartCommon = useCallback(
         (product) => {
-            if (!product?._id) return;
+            if (!product?.id) return;
 
             dispatch(
                 addToCart({
-                    _id: product._id ?? product.id,
+                    id: product.id,          // single id
                     title: product.name,
                     price: Number(getFinalPrice(product)),
                     originalPrice: Number(product.price),
@@ -81,7 +81,7 @@ const ProductCarousel = ({ category, products = [] }) => {
                 />
             </div>
 
-            <h3 className="mt-3 font-semibold text-gray-900 truncate">
+            <h3 className="mt-3 font-semibold truncate">
                 {product.name}
             </h3>
 
@@ -91,7 +91,7 @@ const ProductCarousel = ({ category, products = [] }) => {
                 </span>
 
                 {(product.discount || product.offer_price) && (
-                    <span className="text-sm text-gray-500 line-through">
+                    <span className="text-sm line-through text-gray-500">
                         ₹{product.price}
                     </span>
                 )}
@@ -106,14 +106,14 @@ const ProductCarousel = ({ category, products = [] }) => {
             <div className="mt-4 flex gap-3">
                 <button
                     onClick={() => addItem(product)}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold"
                 >
                     Add to Cart
                 </button>
 
                 <button
                     onClick={() => buyNow(product)}
-                    className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+                    className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-semibold"
                 >
                     Buy Now
                 </button>
@@ -128,12 +128,9 @@ const ProductCarousel = ({ category, products = [] }) => {
             </h2>
 
             <div className="block md:hidden">
-                <Swiper
-                    slidesPerView={1}
-                    spaceBetween={12}
-                >
+                <Swiper slidesPerView={1} spaceBetween={12}>
                     {products.map((product) => (
-                        <SwiperSlide key={product._id}>
+                        <SwiperSlide key={product.id}>
                             <ProductCard product={product} />
                         </SwiperSlide>
                     ))}
@@ -142,7 +139,7 @@ const ProductCarousel = ({ category, products = [] }) => {
 
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
+                    <ProductCard key={product.id} product={product} />
                 ))}
             </div>
         </section>

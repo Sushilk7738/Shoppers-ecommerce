@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch } from "./client";  //single gateway
 
 export const productAPI = {
     getProducts: (keyword = "", page = "") =>

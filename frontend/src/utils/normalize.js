@@ -1,8 +1,9 @@
-//product normalizer
+// product normalizer (SINGLE ID SOURCE)
 export const normalizeProduct = (product = {}) => {
+    const id = product.id ?? product._id ?? null;
+
     return {
-        _id: product._id ?? product.id ?? null,
-        id: product._id ?? product.id ?? null,
+        id, 
 
         name: product.name ?? "",
         image: product.image ?? null,
@@ -23,19 +24,24 @@ export const normalizeProduct = (product = {}) => {
     };
 };
 
-//order normalizer
+// order normalizer (SINGLE ID SOURCE)
 export const normalizeOrder = (order = {}) => {
+    const id = order.id ?? order._id ?? null;
+
     return {
-        ...order,                        
-        _id: order._id ?? order.id ?? null,
+        ...order,
+        id, 
 
         orderItems: Array.isArray(order.orderItems)
-            ? order.orderItems
+            ? order.orderItems.map((item) => ({
+                ...item,
+                id: item.id ?? item._id ?? null, 
+            }))
             : [],
 
         totalPrice: Number(order.totalPrice ?? 0),
-        isPaid: Boolean(order.isPaid ?? false),
-        isDelivered: Boolean(order.isDelivered ?? false),
-        createdAt: order.createdAt ?? null,
+        isPaid: Boolean(order.isPaid ?? order.is_paid ?? false),
+        isDelivered: Boolean(order.isDelivered ?? order.is_delivered ?? false),
+        createdAt: order.createdAt ?? order.created_at ?? null,
     };
 };

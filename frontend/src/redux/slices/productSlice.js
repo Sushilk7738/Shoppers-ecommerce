@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import productAPI from "../../mocks/product";
-import { productAPI } from "../../api/product.api";
-import { normalizeProduct } from "../../utils/normalize";
+import { productAPI } from "../../api/product.api"; // centralized API
+import { normalizeProduct } from "../../utils/normalize"; // normalize once
 
 const initialState = {
     productList: {
@@ -10,21 +9,7 @@ const initialState = {
         error: null,
         page: 0,
         pages: 0,
-    },
-    productDetails: {
-        product: { reviews: [] },
-        loading: false,
-        error: null,
-    },
-    createReview: {
-        loading: false,
-        error: null,
-        success: false,
-    },
-    topRatedProducts: {
-        products: [],
-        loading: false,
-        error: null,
+        fetched: false, // fetch guard
     },
 };
 
@@ -38,53 +23,14 @@ const productSlice = createSlice({
         },
         productListSuccess(state, action) {
             state.productList.loading = false;
-            state.productList.products = action.payload.products || [];
-            state.productList.page = action.payload.page ?? 0;
-            state.productList.pages = action.payload.pages ?? 0;
+            state.productList.products = action.payload.products;
+            state.productList.page = action.payload.page;
+            state.productList.pages = action.payload.pages;
+            state.productList.fetched = true; // mark fetched
         },
         productListFailure(state, action) {
             state.productList.loading = false;
             state.productList.error = action.payload;
-        },
-
-        productDetailsRequest(state) {
-            state.productDetails.loading = true;
-            state.productDetails.error = null;
-        },
-        productDetailsSuccess(state, action) {
-            state.productDetails.loading = false;
-            state.productDetails.product = action.payload;
-        },
-        productDetailsFailure(state, action) {
-            state.productDetails.loading = false;
-            state.productDetails.error = action.payload;
-        },
-
-        createReviewRequest(state) {
-            state.createReview.loading = true;
-            state.createReview.error = null;
-            state.createReview.success = false;
-        },
-        createReviewSuccess(state) {
-            state.createReview.loading = false;
-            state.createReview.success = true;
-        },
-        createReviewFailure(state, action) {
-            state.createReview.loading = false;
-            state.createReview.error = action.payload;
-        },
-
-        productTopRequest(state) {
-            state.topRatedProducts.loading = true;
-            state.topRatedProducts.error = null;
-        },
-        productTopSuccess(state, action) {
-            state.topRatedProducts.loading = false;
-            state.topRatedProducts.products = action.payload || [];
-        },
-        productTopFailure(state, action) {
-            state.topRatedProducts.loading = false;
-            state.topRatedProducts.error = action.payload;
         },
     },
 });
@@ -93,95 +39,39 @@ export const {
     productListRequest,
     productListSuccess,
     productListFailure,
-    productDetailsRequest,
-    productDetailsSuccess,
-    productDetailsFailure,
-    createReviewRequest,
-    createReviewSuccess,
-    createReviewFailure,
-    productTopRequest,
-    productTopSuccess,
-    productTopFailure,
 } = productSlice.actions;
 
+// single fetch thunk
 export const fetchProductList =
-(keyword = "", pageNumber = "") =>
-async (dispatch) => {
-    try {
-    dispatch(productListRequest());
+    (keyword = "", page = "") =>
+    async (dispatch, getState) => {
+        const { fetched, loading } = getState().product.productList;
+        if (fetched || loading) return; // prevent duplicates
 
-    const data = await productAPI.getProducts(keyword, pageNumber);
-
-    const rawProducts = Array.isArray(data.products)
-        ? data.products
-        : Array.isArray(data)
-        ? data
-        : [];
-
-    const normalizedProducts = rawProducts.map(normalizeProduct);
-
-    dispatch(
-        productListSuccess({
-        products: normalizedProducts,
-        page: data.page ?? 0,
-        pages: data.pages ?? 0,
-        })
-    );
-    } catch (error) {
-    dispatch(
-        productListFailure(
-        error?.message || "Failed to load products"
-        )
-    );
-    }
-};
-
-
-export const fetchProductDetails = (id) => async (dispatch) => {
-    try {
-        dispatch(productDetailsRequest());
-        const productDetails = await productAPI.getProductDetails(id);
-        dispatch(productDetailsSuccess(normalizeProduct(productDetails)));
-    } catch (error) {
-        dispatch(
-            productDetailsFailure(
-                error?.message || "Failed to load product"
-            )
-        );
-    }
-};
-
-export const createReview =
-    (productId, review) => async (dispatch) => {
         try {
-            dispatch(createReviewRequest());
-            await productAPI.createProductReview(productId, review);
-            dispatch(createReviewSuccess());
-        } catch (error) {
+            dispatch(productListRequest());
+            const data = await productAPI.getProducts(keyword, page);
+
+            const raw = Array.isArray(data?.products)
+                ? data.products
+                : Array.isArray(data)
+                ? data
+                : [];
+
+            const products = raw.map(normalizeProduct);
+
             dispatch(
-                createReviewFailure(
-                    error?.message || "Failed to create review"
-                )
+                productListSuccess({
+                    products,
+                    page: data?.page ?? 0,
+                    pages: data?.pages ?? 0,
+                })
+            );
+        } catch (err) {
+            dispatch(
+                productListFailure(err?.message || "Failed to load products")
             );
         }
     };
-
-export const fetchTopRatedProducts = () => async (dispatch) => {
-    try {
-        dispatch(productTopRequest());
-        const topRatedProducts =
-            await productAPI.getTopRatedProducts();
-        const normalizedTopProducts = Array.isArray(topRatedProducts)
-            ? topRatedProducts.map(normalizeProduct)
-            : [];
-        dispatch(productTopSuccess(normalizedTopProducts));
-    } catch (error) {
-        dispatch(
-            productTopFailure(
-                error?.message || "Failed to load top products"
-            )
-        );
-    }
-};
 
 export default productSlice.reducer;

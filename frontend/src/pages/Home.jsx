@@ -36,10 +36,10 @@ const Home = () => {
 
     const addItem = useCallback(
         (product) => {
-            if (!product) return;
+            if (!product?.id) return;
             dispatch(
                 addToCart({
-                    _id: product._id ?? product.id,
+                    id: product.id,         
                     title: product.name,
                     price: Number(getFinalPrice(product)),
                     originalPrice: Number(product.price),
@@ -59,8 +59,7 @@ const Home = () => {
     return (
         <Layout>
             <div className="bg-white">
-
-                {/* HOME BANNER */}
+                {/* banner */}
                 <header className="mb-6 h-[220px] md:h-[420px]">
                     <Swiper
                         slidesPerView={1}
@@ -70,37 +69,22 @@ const Home = () => {
                         className="h-full"
                     >
                         <SwiperSlide>
-                            <img
-                                src="/p4.jpg"
-                                className="w-full h-full object-cover"
-                                alt="banner-1"
-                            />
+                            <img src="/p4.jpg" className="w-full h-full object-cover" />
                         </SwiperSlide>
                         <SwiperSlide>
-                            <img
-                                src="/p2.jpg"
-                                className="w-full h-full object-cover"
-                                alt="banner-2"
-                            />
+                            <img src="/p2.jpg" className="w-full h-full object-cover" />
                         </SwiperSlide>
                         <SwiperSlide>
-                            <img
-                                src="/p3.jpg"
-                                className="w-full h-full object-cover"
-                                alt="banner-3"
-                            />
+                            <img src="/p3.jpg" className="w-full h-full object-cover" />
                         </SwiperSlide>
                     </Swiper>
                 </header>
 
-                {/* PRODUCTS */}
+                {/* products */}
                 <section className="px-6 md:px-16 pb-20">
                     <h1 className="text-3xl font-bold text-center mb-2">
                         Latest Products
                     </h1>
-                    <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16">
-                        Discover the latest arrivals curated just for you.
-                    </p>
 
                     {loading && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -117,7 +101,7 @@ const Home = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                             {products.slice(0, 4).map((product, index) => (
                                 <div
-                                    key={product._id}
+                                    key={product.id}   // id only
                                     className="bg-white rounded-xl shadow-lg overflow-hidden
                                         animate__animated animate__fadeInUp
                                         transition-all duration-300
@@ -129,12 +113,12 @@ const Home = () => {
                                             src={product.image}
                                             alt={product.name}
                                             loading="lazy"
-                                            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                                            className="w-full h-full object-contain"
                                         />
                                     </div>
 
                                     <div className="p-4">
-                                        <h2 className="font-semibold text-gray-900 truncate">
+                                        <h2 className="font-semibold truncate">
                                             {product.name}
                                         </h2>
 
@@ -144,14 +128,8 @@ const Home = () => {
                                             </span>
 
                                             {(product.discount || product.offer_price) && (
-                                                <span className="text-sm text-gray-500 line-through">
+                                                <span className="text-sm line-through text-gray-500">
                                                     ₹{product.price}
-                                                </span>
-                                            )}
-
-                                            {product.discount && (
-                                                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full animate__animated animate__pulse animate__infinite">
-                                                    {product.discount}% OFF
                                                 </span>
                                             )}
                                         </div>
@@ -159,14 +137,14 @@ const Home = () => {
                                         <div className="mt-4 space-y-2">
                                             <button
                                                 onClick={() => buyNow(product)}
-                                                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                                                className="w-full bg-green-600 text-white py-2 rounded-lg"
                                             >
                                                 Buy Now
                                             </button>
 
                                             <button
                                                 onClick={() => addItem(product)}
-                                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                                                className="w-full bg-blue-600 text-white py-2 rounded-lg"
                                             >
                                                 Add to Cart
                                             </button>
@@ -175,12 +153,6 @@ const Home = () => {
                                 </div>
                             ))}
                         </div>
-                    )}
-
-                    {!loading && products.length === 0 && (
-                        <p className="text-center text-gray-500 py-20">
-                            No products available.
-                        </p>
                     )}
                 </section>
             </div>

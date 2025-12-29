@@ -1,11 +1,11 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export async function apiFetch(url, options = {}) {
-    const userInfoRaw = localStorage.getItem("userInfo");
-    const userInfo = userInfoRaw ? JSON.parse(userInfoRaw) : null;
-    const token = userInfo?.token;
+    const raw = localStorage.getItem("userInfo");
+    const user = raw ? JSON.parse(raw) : null;
+    const token = user?.token;
 
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const res = await fetch(`${API_BASE_URL}${url}`, {
         ...options,
         headers: {
             "Content-Type": "application/json",
@@ -14,14 +14,14 @@ export async function apiFetch(url, options = {}) {
         },
     });
 
-    if (!response.ok) {
-        let error = "API Error";
+    if (!res.ok) {
+        let msg = "API Error";
         try {
-            const data = await response.json();
-            error = data.detail || error;
+            const data = await res.json();
+            msg = data.detail || msg;
         } catch {}
-        throw new Error(error);
+        throw new Error(msg);
     }
 
-    return response.json();
+    return res.json();
 }

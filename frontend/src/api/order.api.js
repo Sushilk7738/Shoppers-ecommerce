@@ -1,59 +1,45 @@
 import { apiFetch } from "./client";
-import { getAuthToken } from "../utils/Auth";
 
 export const orderAPI = {
+    // create razorpay order
     createOrder: (amount) =>
         apiFetch("/api/orders/create-order/", {
             method: "POST",
             body: JSON.stringify({ amount }),
         }),
 
+    // verify payment
     verifyPayment: (payload) =>
         apiFetch("/api/orders/verify-payment/", {
             method: "POST",
             body: JSON.stringify(payload),
         }),
 
-    listMyOrders: () => {
-        const token = getAuthToken();
-        return apiFetch("/api/orders/myorders/", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-    },
+    listMyOrders: () =>
+        apiFetch("/api/orders/myorders/"),
 
-    getOrderDetails: (id) => {
-        const token = getAuthToken();
-        return apiFetch(`/api/orders/${id}/`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-    },
+    // single order details
+    getOrderDetails: (id) =>
+        apiFetch(`/api/orders/${id}/`),
 
+    // invoice download 
     downloadInvoice: async (id) => {
-    const token = getAuthToken();
+        const token =
+            JSON.parse(localStorage.getItem("userInfo"))?.token;
 
-    const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/orders/${id}/invoice/`,
-        {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+        const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/orders/${id}/invoice/`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error("Invoice download failed");
         }
-    );
 
-    if (!res.ok) {
-        throw new Error("Invoice download failed");
-    }
-
-    return await res.blob();
+        return res.blob();
     },
-
 };
-
-

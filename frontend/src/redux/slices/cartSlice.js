@@ -5,8 +5,7 @@ let initialCartItems = [];
 try {
     const saved = localStorage.getItem("cartItems");
     initialCartItems = saved ? JSON.parse(saved) : [];
-} catch (e) {
-    console.error("Invalid cartItems JSON, clearing...", e);
+} catch {
     localStorage.removeItem("cartItems");
     initialCartItems = [];
 }
@@ -20,23 +19,14 @@ const cartSlice = createSlice({
 
     reducers: {
         addToCart: (state, action) => {
-            if (!action.payload || !action.payload._id) {
-                console.error("INVALID PRODUCT PAYLOAD:", action.payload);
-                return;
-            }
+            if (!action.payload || !action.payload.id) return;
 
             const item = {
                 ...action.payload,
-
-                _id: action.payload._id,
-                _cartKey: `${action.payload._id}_${Date.now()}`,
+                id: action.payload.id, // single identifier
+                _cartKey: `${action.payload.id}_${Date.now()}`, // internal only
                 qty: Number(action.payload.qty) || 1,
-
-                price: Number(
-                    action.payload.price ??
-                    action.payload.offer_price ??
-                    0
-                ),
+                price: Number(action.payload.price ?? 0),
             };
 
             state.cartItems.push(item);
@@ -52,15 +42,10 @@ const cartSlice = createSlice({
 
         updateQuantity: (state, action) => {
             const { _cartKey, qty } = action.payload;
-
             const item = state.cartItems.find(
                 (i) => i._cartKey === _cartKey
             );
-
-            if (item) {
-                item.qty = qty < 1 ? 1 : qty;
-            }
-
+            if (item) item.qty = qty < 1 ? 1 : qty;
             localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
         },
 

@@ -1,20 +1,22 @@
 export const getUserInfo = () => {
-try {
-    return JSON.parse(localStorage.getItem("userInfo")) || null;
-} catch {
-    return null;
-}
+    try {
+        return JSON.parse(localStorage.getItem("userInfo")) || null;
+    } catch {
+        return null;
+    }
 };
 
 export const getAuthToken = () => {
-return getUserInfo()?.token || null;
+    return getUserInfo()?.token || null;
 };
 
 export const saveUserInfo = (data) => {
-if (!data) return;
-localStorage.setItem("userInfo", JSON.stringify(data));
+    if (!data) return;
+    localStorage.setItem("userInfo", JSON.stringify(data));
 };
 
 export const clearUserInfo = () => {
-localStorage.removeItem("userInfo");
+    localStorage.removeItem("userInfo");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("token");       
 };
