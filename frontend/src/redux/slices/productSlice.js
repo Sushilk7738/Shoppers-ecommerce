@@ -41,15 +41,13 @@ export const {
     productListFailure,
 } = productSlice.actions;
 
-// single fetch thunk
+// single fetch 
 export const fetchProductList =
     (keyword = "", page = "") =>
-    async (dispatch, getState) => {
-        const { fetched, loading } = getState().product.productList;
-        if (fetched || loading) return; // prevent duplicates
-
+    async (dispatch) => {
         try {
             dispatch(productListRequest());
+
             const data = await productAPI.getProducts(keyword, page);
 
             const raw = Array.isArray(data?.products)
@@ -73,5 +71,6 @@ export const fetchProductList =
             );
         }
     };
+
 
 export default productSlice.reducer;
