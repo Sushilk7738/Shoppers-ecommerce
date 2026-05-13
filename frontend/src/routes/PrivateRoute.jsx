@@ -12,19 +12,16 @@ const isTokenValid = (token) => {
 
 const PrivateRoute = () => {
     const raw = localStorage.getItem("userInfo");
-    console.log("RAW userInfo:", raw);
 
     let user = null;
     try {
         user = raw ? JSON.parse(raw) : null;
     } catch (e) {
-        console.log("JSON PARSE ERROR", e);
+        user = null;
     }
 
-    console.log("PARSED user:", user);
-    console.log("TOKEN:", user?.token);
-
-    return user?.token ? <Outlet /> : <Navigate to="/login" replace />;
+    
+    return user?.token && isTokenValid(user.token) ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 

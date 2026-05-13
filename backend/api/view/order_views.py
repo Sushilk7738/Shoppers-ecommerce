@@ -61,6 +61,12 @@ def order_detail(request, pk):
 def mark_order_paid(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
+    if order.user != request.user:
+        return Response(
+            {"detail" : "Not Authorized."},
+            status= status.HTTP_403_FORBIDDEN
+        )
+    
     order.isPaid = True
     order.paidAt = datetime.now()
     order.save()

@@ -2,7 +2,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const apiFetch = async (url, options = {}) => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
         const res = await fetch(

@@ -101,7 +101,8 @@ TEMPLATES = [
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=config("DATABASE_URL")
+        default=config("DATABASE_URL"),
+        conn_max_age=600,
     )
 }
 
@@ -143,8 +144,8 @@ REST_FRAMEWORK = {
 
 # jwt
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=2000),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1500),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 

@@ -44,7 +44,13 @@ export const {
 // single fetch 
 export const fetchProductList =
     (keyword = "", page = "") =>
-    async (dispatch) => {
+    async (dispatch, getState) => {
+        const {fetched, loading} = getState().product.productList;
+
+        if (fetched && !keyword) return;
+        
+        if (loading) return;
+        
         try {
             dispatch(productListRequest());
 
