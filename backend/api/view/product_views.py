@@ -22,6 +22,7 @@ def getProducts(request):
     return Response({"products": serializer.data})
 
 
+
 @api_view(["GET"])
 def getTopProducts(request):
     products = Product.objects.filter(
