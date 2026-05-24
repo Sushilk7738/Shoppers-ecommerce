@@ -1,6 +1,9 @@
+from api.utils.email_utils import send_order_success_email
+from api.view.invoice_views import generate_invoice_pdf_bytes
 from api.models import Order, OrderItem, ShippingAddress, Product
 from django.utils import timezone
 from django.db import transaction
+
 
 @transaction.atomic
 def create_order_from_cart(
@@ -61,5 +64,17 @@ def create_order_from_cart(
             country=shipping_address.get("country", "India"),
             shippingPrice=shipping_address.get("shippingPrice", 0),
         )
+
+    if mark_paid:
+        try:
+            pdf_content = generate_invoice_pdf_bytes(order, user)
+            send_order_success_email(
+                user_email=user.email,
+                order_id=order.pk,
+                pdf_content=pdf_content,
+            )
+            print("EMAIL SENT SUCCESSFULLY")
+        except Exception as e:
+            print("EMAIL FAILED — order still saved:", e)
 
     return order

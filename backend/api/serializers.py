@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Product, Review, Order, OrderItem, ShippingAddress, Contact
 
 
@@ -187,29 +186,3 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        email = attrs.get("username")   
-        password = attrs.get("password")
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid credentials")
-
-        if not user.check_password(password):
-            raise serializers.ValidationError("Invalid credentials")
-
-        data = super().validate({
-            "username": user.username,   
-            "password": password,
-        })
-
-        data["user"] = {
-            "id": user.id,
-            "email": user.email,
-            "name": user.first_name,
-            "isAdmin": user.is_staff,
-        }
-
-        return data
